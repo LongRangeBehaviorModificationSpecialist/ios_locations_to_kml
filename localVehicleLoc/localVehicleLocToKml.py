@@ -9,13 +9,7 @@ from localVehicleLoc.localVehicleLocVars import(
     localVehicleLocKmlFileHeader,
     localVehicleLocKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\Local.sqlite" --dest "C:\Users\mikes\Desktop\temp\results" --destf "local_sqlite_veh_loc" --csv y --database 6 --btime 722487415 --etime 724470277
-
 c = Console()
-
 
 def localVehicleLocToKml(
         source: str,
@@ -59,8 +53,8 @@ def localVehicleLocToKml(
     with open(f'{output_kml_file}', 'w', encoding='utf-8') as f:
 
         # Write the header data of the output .kml file.
-        cache_sqlite_kml_header = localVehicleLocKmlFileHeader()
-        f.write(cache_sqlite_kml_header)
+        kml_header = localVehicleLocKmlFileHeader()
+        f.write(kml_header)
 
         # Initialize a counter variable to keep track of number of records.
         count = 0
@@ -83,7 +77,7 @@ def localVehicleLocToKml(
             c.print(f'[grey66]Processing Row #: [dodger_blue1]{record:,}')
 
             # Write the data from each record to the output .kml file.
-            cache_sqlite_kml_body = localVehicleLocKmlFileBody(
+            kml_body = localVehicleLocKmlFileBody(
                 record=record,
                 utc_time=utc_time,
                 local_time=local_time,
@@ -95,7 +89,7 @@ def localVehicleLocToKml(
                 identifier=identifier,
                 data_source=data_source
             )
-            f.write(cache_sqlite_kml_body)
+            f.write(kml_body)
 
             # Increment the counter variable for the next record.
             count += 1

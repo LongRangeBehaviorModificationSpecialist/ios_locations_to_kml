@@ -9,13 +9,7 @@ from cacheEncBWifi.cacheEncBWifiVars import(
     cacheEncBWifiKmlFileHeader,
     cacheEncBWifiKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\cache_encryptedB.db" --dest "C:\Users\mikes\Desktop\temp\results" --destf "cache_encryptedB_Wifi_locations" --csv y --database 2 --btime 723993933 --etime 724000738
-
 c = Console()
-
 
 def cacheEncBWifiToKml(
         source: str,
@@ -59,8 +53,8 @@ def cacheEncBWifiToKml(
     with open(f'{output_kml_file}', 'w', encoding='utf-8') as f:
 
         # Write the header data of the output .kml file.
-        cacheEncBWifiKmlHeader = cacheEncBWifiKmlFileHeader()
-        f.write(cacheEncBWifiKmlHeader)
+        kml_header = cacheEncBWifiKmlFileHeader()
+        f.write(kml_header)
 
         # Initialize a counter variable to keep track of number of records.
         count = 0
@@ -83,7 +77,7 @@ def cacheEncBWifiToKml(
             c.print(f'[grey66]Processing Row #: [dodger_blue1]{record:,}')
 
             # Write the data from each record to the output .kml file.
-            cacheEncBWifiKmlBody = cacheEncBWifiKmlFileBody(
+            kml_body = cacheEncBWifiKmlFileBody(
                 record=record,
                 local_time=local_time,
                 latitude=latitude,
@@ -96,7 +90,7 @@ def cacheEncBWifiToKml(
                 confidence=confidence,
                 data_source=data_source
             )
-            f.write(cacheEncBWifiKmlBody)
+            f.write(kml_body)
 
             # Increment the counter variable for the next record.
             count += 1

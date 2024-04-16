@@ -9,13 +9,7 @@ from cloudV2SigLoc.cloudV2SigLocVars import(
     cloudV2SigLocKmlFileHeader,
     cloudV2SigLocKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\Cloud-V2.sqlite" --dest "C:\Users\mikes\Desktop\temp\results" --destf "cloud-V2_sig_locations" --csv y --database 4 --btime 710365173 --etime 724387582
-
 c = Console()
-
 
 def cacheV2SigLocToKml(
         source: str,
@@ -59,8 +53,8 @@ def cacheV2SigLocToKml(
     with open(f'{output_kml_file}', 'w', encoding='utf-8') as f:
 
         # Write the header data of the output .kml file.
-        cloudV2KmlHeader = cloudV2SigLocKmlFileHeader()
-        f.write(cloudV2KmlHeader)
+        kml_header = cloudV2SigLocKmlFileHeader()
+        f.write(kml_header)
 
         # Initialize a counter variable to keep track of number of records.
         count = 0
@@ -86,7 +80,7 @@ def cacheV2SigLocToKml(
             c.print(f'[grey66]Processing Row #: [dodger_blue1]{record:,}')
 
             # Write the data from each record to the output .kml file.
-            cloudV2KmlBody = cloudV2SigLocKmlFileBody(
+            kml_body = cloudV2SigLocKmlFileBody(
                 record=record,
                 address_info=address_info,
                 latitude=latitude,
@@ -102,7 +96,7 @@ def cacheV2SigLocToKml(
                 zrtmapitemmo_zaddress=zrtmapitemmo_zaddress,
                 data_source=data_source
             )
-            f.write(cloudV2KmlBody)
+            f.write(kml_body)
 
             # Increment the counter variable for the next record.
             count += 1

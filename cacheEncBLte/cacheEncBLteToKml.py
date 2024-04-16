@@ -9,13 +9,7 @@ from cacheEncBLte.cacheEncBLteVars import(
     cacheEncBLteKmlFileHeader,
     cacheEncBLteKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\cache_encryptedB.db" --dest "C:\Users\mikes\Desktop\temp\results" --destf "cache_encryptedB_LTE_locations" --csv y --database 3 --btime 723994369 --etime 724142334
-
 c = Console()
-
 
 def cacheEncBLteToKml(
         source: str,
@@ -59,8 +53,8 @@ def cacheEncBLteToKml(
     with open(f'{output_kml_file}', 'w', encoding='utf-8') as f:
 
         # Write the header data of the output .kml file.
-        cacheEncBLteKmlHeader = cacheEncBLteKmlFileHeader()
-        f.write(cacheEncBLteKmlHeader)
+        kml_header = cacheEncBLteKmlFileHeader()
+        f.write(kml_header)
 
         # Initialize a counter variable to keep track of number of records.
         count = 0
@@ -87,7 +81,7 @@ def cacheEncBLteToKml(
             site_info = f'MCC: {mcc} | MNC: {mnc} | TAC: {tac} | CI: {ci}'
 
             # Write the data from each record to the output .kml file.
-            cacheEncBLteKmlBody = cacheEncBLteKmlFileBody(
+            kml_body = cacheEncBLteKmlFileBody(
                 record=record,
                 utc_time=utc_time,
                 local_time=local_time,
@@ -99,7 +93,7 @@ def cacheEncBLteToKml(
                 confidence=confidence,
                 data_source=data_source
             )
-            f.write(cacheEncBLteKmlBody)
+            f.write(kml_body)
 
             # Increment the counter variable for the next record.
             count += 1

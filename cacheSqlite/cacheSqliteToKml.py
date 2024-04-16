@@ -9,13 +9,7 @@ from cacheSqlite.cacheSqliteVars import(
     cacheSqliteKmlFileHeader,
     cacheSqliteKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\Cache.sqlite" --dest "C:\Users\mikes\Desktop\temp\results" --destf "cache_sqlite_locations" --csv y --database 1 --btime 724482000 --etime 724507200
-
 c = Console()
-
 
 def cacheSqliteToKml(
         source: str,

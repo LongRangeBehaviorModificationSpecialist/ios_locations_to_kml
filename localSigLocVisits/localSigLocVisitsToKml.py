@@ -9,13 +9,7 @@ from localSigLocVisits.localSigLocVisitsVars import(
     localSigLocVisitKmlFileHeader,
     localSigLocVisitKmlFileBody)
 
-
-# EXAMPLE SYNTAX:
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Desktop\temp\dbs\Local.sqlite" --dest "C:\Users\mikes\Desktop\temp\results" --destf "local_signif_loc_visits" --csv y --database 5 --btime 715158438 --etime 724366681
-
 c = Console()
-
 
 def localSigLocVisitToKml(
         source: str,
@@ -59,8 +53,8 @@ def localSigLocVisitToKml(
     with open(f'{output_kml_file}', 'w', encoding='utf-8') as f:
 
         # Write the header data of the output .kml file.
-        localSigLocVisitKmlHeader = localSigLocVisitKmlFileHeader()
-        f.write(localSigLocVisitKmlHeader)
+        kml_header = localSigLocVisitKmlFileHeader()
+        f.write(kml_header)
 
         # Initialize a counter variable to keep track of number of records.
         count = 0
@@ -84,7 +78,7 @@ def localSigLocVisitToKml(
             c.print(f'[grey66]Processing Row #: [dodger_blue1]{record:,}')
 
             # Write the data from each record to the output .kml file.
-            localSigLocVisitKmlBody = localSigLocVisitKmlFileBody(
+            kml_body = localSigLocVisitKmlFileBody(
                 record=record,
                 data_point_count=data_point_count,
                 location_of_interest_id=location_of_interest_id,
@@ -98,7 +92,7 @@ def localSigLocVisitToKml(
                 location_confidence=location_confidence,
                 data_source=data_source
             )
-            f.write(localSigLocVisitKmlBody)
+            f.write(kml_body)
 
             # Increment the counter variable for the next record.
             count += 1
