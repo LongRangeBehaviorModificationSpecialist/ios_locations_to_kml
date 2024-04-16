@@ -1,0 +1,4 @@
+# !/usr/bin/env python3
+
+pandas == 2.1.2
+rich == 11.0.0
