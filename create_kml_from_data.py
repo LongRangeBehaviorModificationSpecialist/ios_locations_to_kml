@@ -27,12 +27,13 @@ def main() -> None:
   ===========================\n
   [-] Create a .kml file by reading the location records from
       the database specified by the user.
-  [-] The --btime and --etime values should be given in "Apple
-      Absolute Time" (a/k/a) "Cocoa Core Data" format. To convert
+  [-] The '--btime' and '--etime' values should be given in 'Apple
+      Absolute Time' (a/k/a 'Cocoa Core Data') format. To convert
       time values to/from the required input, see:
       https://www.gaijin.at/en/tools/time-converter.
-  [-] For the "--database" argument, enter the corresponding
-      number for the database you want to examine:\n
+  [-] For the '--database' argument, enter the corresponding
+      number for the database/table containing the records you want
+      to examine:\n
       1 = Cache.sqlite (Location History),
       2 = cache_encryptedB.db (WiFi locations),
       3 = cache_encryptedB.db (LTE locations),
@@ -40,7 +41,9 @@ def main() -> None:
       5 = Local.sqlite (Significant Location Visits), or
       6 = Local.sqlite (Vehicle Locations)\n
   [-] Example Syntax:\n
-      python .\create_kml_from_data.py --source "[DIRECTORY-OF-DATABASE-FILE]" --dest "[DIRECTORY-TO-SAVE-OUTPUT-FILE(S)]" --destf "[OUTPUT-FILE-NAME]" --csv y --database 3 --btime [START-TIME] --etime [END-TIME]""",
+      python .\create_kml_from_data.py --source SOURCE --dest DEST --destf DESTF --csv y --database 3 --btime START-TIME --etime END-TIME\n
+  [-] NOTE: If the directory paths contain spaces, enclose the full path in
+      double quotes.""",
         epilog=f"""  [-] DEVELOPED BY: {__author__} | LAST UPDATED: {__dlu__}"""
     )
 
@@ -48,21 +51,21 @@ def main() -> None:
         '--source',
         type=Path,
         required=True,
-        help='REQUIRED - Path of database file to query.'
+        help='[str] REQUIRED Path of database file to query.'
     )
 
     parser.add_argument(
         '--dest',
         type=Path,
         required=True,
-        help='REQUIRED - Path to save the resulting .kml file.'
+        help='[str] REQUIRED Path to save the resulting .kml file.'
     )
 
     parser.add_argument(
         '--destf',
         type=str,
         required=True,
-        help='REQUIRED - Name to use for the created .kml file.'
+        help='[str] REQUIRED Name to use for the created .kml file.'
     )
 
     parser.add_argument(
@@ -70,7 +73,7 @@ def main() -> None:
         type=str,
         choices=['y','n'],
         required=True,
-        help='REQUIRED - Create a .csv file with the results of the query.'
+        help='[str] REQUIRED Create a .csv file with the results of the query.'
     )
 
     parser.add_argument(
@@ -78,21 +81,21 @@ def main() -> None:
         type=int,
         choices=[1,2,3,4,5,6],
         required=True,
-        help='REQUIRED - Number of the database file you want to examine.'
+        help='[int] REQUIRED Number of the database file you want to examine.'
     )
 
     parser.add_argument(
         '--btime',
         type=int,
         required=True,
-        help='REQUIRED - Timestamp of the first record to return.'
+        help='[int] REQUIRED Timestamp of the first record to return.'
     )
 
     parser.add_argument(
         '--etime',
         type=int,
         required=True,
-        help='REQUIRED - Timestamp of the last record to return.'
+        help='[int] REQUIRED Timestamp of the last record to return.'
     )
 
     args = parser.parse_args()
