@@ -27,7 +27,10 @@ SELECT
 
 FROM WifiLocation
 
-WHERE Timestamp BETWEEN {begin_time} AND {end_time}
+WHERE
+    Timestamp BETWEEN {begin_time} AND {end_time}
+    AND (Latitude !=0)
+    OR (Longitude !=0)
 
 ORDER BY timestamp ASC
 '''
