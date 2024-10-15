@@ -23,6 +23,8 @@ def cacheSqliteToKml(
     # Get the time the program began to execute.
     start_time = time.perf_counter()
 
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}.kml" --csv {make_csv} --db 1 --btime {begin_time} --etime {end_time}"""
+
     # Generate the SQL query to include the begin_time and end_time values.
     CACHE_SQLITE_QUERY = cacheSqliteSqlQuery(
         begin_time=begin_time,
@@ -123,6 +125,7 @@ def cacheSqliteToKml(
     total_time = ending_time - start_time
 
     hf.end_program(
+        query_command_string=query_command_string,
         number_of_rows=number_of_rows,
         begin_time=begin_time,
         end_time=end_time,

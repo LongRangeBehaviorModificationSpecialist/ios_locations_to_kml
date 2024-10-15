@@ -84,7 +84,8 @@ class HelperFunctions:
         output_csv_file: str,
         count: int,
         output_kml_file: str,
-        total_time: str) -> None:
+        total_time: str,
+        query_command_string: str,) -> None:
         c.print('\n[grey66]=====[light_goldenrod1] RESULTS [grey66]=====')
 
         c.print(f'\n[-] Processed [dodger_blue1]{count:,} [grey66]\
@@ -92,8 +93,9 @@ records from the database')
 
         # Display the time frame between which the database records
         # were obtained.
-        c.print('\n[-] Timestamp Data')
-        c.print(f'\n    Beginning Date/Time Input: [dodger_blue1]\
+        c.print('\n[-] Query Data')
+        c.print(f"\n    Query command: [dodger_blue1]{query_command_string}")
+        c.print(f'    Beginning Date/Time Input: [dodger_blue1]\
 {HelperFunctions.convert_db_timestamp(begin_time)}')
         c.print(f'    End Date/Time Input: [dodger_blue1]\
 {HelperFunctions.convert_db_timestamp(end_time)}')
@@ -104,7 +106,7 @@ records from the database')
             if output_csv_file:
                 # Print verification that the .csv file was created.
                 c.print(f'\n[grey66][-] The .csv file was created successfully')
-                c.print(f'[grey66]    The .csv output file is saved as \
+                c.print(f'[grey66]    The .csv file is saved as \
 [dodger_blue1]{Path(output_csv_file).name}')
             else:
                 pass
@@ -114,7 +116,7 @@ records from the database')
         c.print(f'\n[grey66][-] The .kml file was created with [dodger_blue1]\
 {count:,} [grey66]line(s) of data')
         # Show the name of the output .kml file (including appended date/time).
-        c.print(f'[grey66]    The .kml output file is saved as [dodger_blue1]\
+        c.print(f'[grey66]    The .kml file is saved as [dodger_blue1]\
 {Path(output_kml_file).name}')
         # Show directory where the output .kml file is saved.
         c.print(f'\n[grey66][-] The results file(s) are saved in the \
