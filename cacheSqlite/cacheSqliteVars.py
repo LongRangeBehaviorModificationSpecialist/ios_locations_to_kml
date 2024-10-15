@@ -5,7 +5,10 @@ def cacheSqliteSqlQuery(
         end_time: int) -> str:
     '''Adds the `begin_time` and `end_time` values to the SQL query that will
     be run against the Cache.sqlite database file so that only records during
-    the desired time frame are returned.
+    the desired time frame are returned
+
+    Time stamps in this database are stored in `CF Absolute Time` a/k/a/
+    `Cocoa Core Data` time.
     '''
     CACHE_SQLITE_QUERY = f'''
 SELECT

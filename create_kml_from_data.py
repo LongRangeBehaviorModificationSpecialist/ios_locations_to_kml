@@ -77,7 +77,7 @@ def main() -> None:
     )
 
     parser.add_argument(
-        '--database',
+        '--db',
         type=int,
         choices=[1,2,3,4,5,6],
         required=True,
@@ -105,7 +105,7 @@ def main() -> None:
     dest = argv['dest']
     destf = argv['destf']
     make_csv = argv['csv']
-    db_type = argv['database']
+    db_type = argv['db']
     begin_time = argv['btime']
     end_time = argv['etime']
 
