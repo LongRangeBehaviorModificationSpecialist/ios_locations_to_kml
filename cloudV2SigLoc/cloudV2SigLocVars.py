@@ -9,25 +9,22 @@ def cloudV2SigLocSqlQuery(
     '''
     CLOUDV2_SIG_LOC_QUERY = f'''
 SELECT
-    ROW_NUMBER() OVER() AS 'Record',
+    ROW_NUMBER() OVER() AS 'RecordNo.',
     ZRTADDRESSMO.Z_PK AS 'ZRTADDRESSMO.Z_PK',
-    ZRTADDRESSMO.ZMAPITEM AS 'ZRTADDRESSMO.ZMAPITEM',
-    ZRTMAPITEMMO.Z_PK AS 'ZRTMAPITEMMO.Z_PK',
-    ZRTMAPITEMMO.ZADDRESS AS 'ZRTMAPITEMMO.ZADDRESS',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'Address Creation Date (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Address Creation Date (Local)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'Address Expire Date (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Address Expire Date (Local)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressCreationDate(UTC)',
+    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'AddressCreationDate(Local)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressExpireDate(UTC)',
+    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'AddressExpireDate(Local)',
     ZRTADDRESSMO.ZSUBTHOROUGHFARE || ' ' ||
     REPLACE(ZRTADDRESSMO.ZTHOROUGHFARE, '&', 'at') || ', ' ||
     ZRTADDRESSMO.ZLOCALITY || ', ' ||
     ZRTADDRESSMO.ZADMINISTRATIVEAREA || ' ' ||
     ZRTADDRESSMO.ZPOSTALCODE || ' ' ||
-    ZRTADDRESSMO.ZCOUNTRYCODE AS 'Address_Info',
+    ZRTADDRESSMO.ZCOUNTRYCODE AS 'AddressInfo',
     ZRTMAPITEMMO.ZLATITUDE AS 'Latitude',
     ZRTMAPITEMMO.ZLONGITUDE AS 'Longitude',
     ZRTMAPITEMMO.ZUNCERTAINTY AS 'Uncertainty',
-    'Cloud-V2.sqlite [ZRTADDRESSMO(Z_PK:' || ZRTADDRESSMO.Z_PK || ')]' AS 'Data Source'
+    'Cloud-V2.sqlite [ZRTADDRESSMO(Z_PK:' || ZRTADDRESSMO.Z_PK || ')]' AS 'DataSource'
 
 FROM ZRTADDRESSMO
     LEFT JOIN ZRTMAPITEMMO ON ZRTADDRESSMO.ZMAPITEM = ZRTMAPITEMMO.ZADDRESS
@@ -133,24 +130,12 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class='data'>$[zrtaddressmo_zpk]</td>
                     </tr>
                     <tr>
-                      <td class='heading'>ZRTADDRESSMO MapItem No.</td>
-                      <td class='data'>$[zrtaddressmo_zmapitem]</td>
-                    </tr>
-                    <tr>
-                      <td class='heading'>ZRTMAPITEMMO PK No.</td>
-                      <td class='data'>$[zrtmapitemmo_zpk]</td>
-                    </tr>
-                    <tr>
                       <td class='heading'>Address Expire Date (UTC)</td>
                       <td class='data'>$[add_expire_utc]</td>
                     </tr>
                     <tr>
                       <td class='heading'>Address Expire Date (Local)</td>
                       <td class='data'>$[add_expire_local]</td>
-                    </tr>
-                    <tr>
-                      <td class='heading'>ZRTMAPITEMMO ADDRESS No.</td>
-                      <td class='data'>$[zrtmapitemmo_zaddress]</td>
                     </tr>
                     <tr>
                       <td class='heading'>Record Source</td>
@@ -187,11 +172,8 @@ def cloudV2SigLocKmlFileBody(
         add_create_utc: str,
         add_create_local: str,
         zrtaddressmo_z_pk: str,
-        zrtaddressmo_zmapitem: str,
-        zrtmapitemmo_z_pk: str,
         add_expire_utc: str,
         add_expire_local: str,
-        zrtmapitemmo_zaddress: str,
         data_source: str) -> str:
     CLOUDV2_SIG_LOC_KML_FILE_BODY = f'''
       <Placemark>
@@ -241,20 +223,11 @@ def cloudV2SigLocKmlFileBody(
           <Data name='zrtaddressmo_zpk'>
             <value>{zrtaddressmo_z_pk}</value>
           </Data>
-          <Data name='zrtaddressmo_zmapitem'>
-            <value>{zrtaddressmo_zmapitem}</value>
-          </Data>
-          <Data name='zrtmapitemmo_zpk'>
-            <value>{zrtmapitemmo_z_pk:.0f}</value>
-          </Data>
           <Data name='add_expire_utc'>
             <value>{add_expire_utc}</value>
           </Data>
           <Data name='add_expire_local'>
             <value>{add_expire_local}</value>
-          </Data>
-          <Data name='zrtmapitemmo_zaddress'>
-            <value>{zrtmapitemmo_zaddress:.0f}</value>
           </Data>
           <Data name='data_source'>
             <value>{data_source}</value>

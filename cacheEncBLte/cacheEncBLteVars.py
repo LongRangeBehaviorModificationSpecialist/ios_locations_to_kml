@@ -5,9 +5,9 @@ def cacheEncBLteSqlQuery(
         end_time: int) -> str:
     CACHE_ENCRYPTEDB_LTE_QUERY = f'''
 SELECT
-    ROW_NUMBER() OVER() AS 'Record',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(Timestamp + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp (Local)',
+    ROW_NUMBER() OVER() AS 'RecordNo.',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
+    strftime('%Y-%m-%d %H:%M:%S', datetime(Timestamp + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp(Local)',
     Latitude AS 'Latitude',
     Longitude AS 'Longitude',
     MCC AS 'MCC',
@@ -17,7 +17,7 @@ SELECT
     HorizontalAccuracy AS 'HorizontalAccuracy',
     Altitude AS 'Altitude',
     Confidence AS 'Confidence',
-    'cache_encryptedB.db(Table:LteCellLocations)' AS 'Data Source'
+    'cache_encryptedB.db(Table:LteCellLocations)' AS 'DataSource'
 
 FROM LteCellLocation
 

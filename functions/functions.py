@@ -135,6 +135,7 @@ records from the database')
         # If the user enters 'y', the .kml file will be opened in Google Earth.
         if choice.lower().strip() == 'y':
             # Open the output file in Google Earth.
+            c.print("\n[grey66]    Opening the .kml file with Google Earth...")
             webbrowser.open(kml_file)
             # Print closing message on the screen.
             c.print(f'\n{closing}')

@@ -23,6 +23,8 @@ def cacheV2SigLocToKml(
     # Get the time the program began to execute.
     start_time = time.perf_counter()
 
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}.kml" --csv {make_csv} --db 1 --btime {begin_time} --etime {end_time}"""
+
     # Generate the SQL query to include the begin_time and end_time values.
     CLOUDV2_SIG_LOC_QUERY = cloudV2SigLocSqlQuery(
         begin_time=begin_time,
@@ -69,11 +71,8 @@ def cacheV2SigLocToKml(
             add_create_utc = row['Address Creation Date (UTC)']
             add_create_local = row['Address Creation Date (Local)']
             zrtaddressmo_z_pk = row['ZRTADDRESSMO.Z_PK']
-            zrtaddressmo_zmapitem= row['ZRTADDRESSMO.ZMAPITEM']
-            zrtmapitemmo_z_pk = row['ZRTMAPITEMMO.Z_PK']
             add_expire_utc = row['Address Expire Date (UTC)']
             add_expire_local = row['Address Expire Date (Local)']
-            zrtmapitemmo_zaddress = row['ZRTMAPITEMMO.ZADDRESS']
             data_source = row['Data Source']
 
             # Print message to screen with each record number added.
@@ -89,11 +88,8 @@ def cacheV2SigLocToKml(
                 add_create_utc=add_create_utc,
                 add_create_local=add_create_local,
                 zrtaddressmo_z_pk=zrtaddressmo_z_pk,
-                zrtaddressmo_zmapitem=zrtaddressmo_zmapitem,
-                zrtmapitemmo_z_pk=zrtmapitemmo_z_pk,
                 add_expire_utc=add_expire_utc,
                 add_expire_local=add_expire_local,
-                zrtmapitemmo_zaddress=zrtmapitemmo_zaddress,
                 data_source=data_source
             )
             f.write(kml_body)
@@ -124,6 +120,7 @@ def cacheV2SigLocToKml(
     total_time = ending_time - start_time
 
     hf.end_program(
+        query_command_string=query_command_string,
         number_of_rows=number_of_rows,
         begin_time=begin_time,
         end_time=end_time,

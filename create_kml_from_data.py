@@ -41,7 +41,7 @@ def main() -> None:
       5 = Local.sqlite (Significant Location Visits), or
       6 = Local.sqlite (Vehicle Locations)\n
   [-] Example Syntax:\n
-      python .\create_kml_from_data.py --source SOURCE --dest DEST --destf DESTF --csv y --database 3 --btime START-TIME --etime END-TIME\n
+      python .\create_kml_from_data.py --source [SOURCE] --dest [DEST] --destf [DESTF] --csv y --db 3 --btime [START_TIME] --etime [END_TIME]\n
   [-] NOTE: If the directory paths contain spaces, enclose the full path in
       double quotes.""",
         epilog=f"""  [-] DEVELOPED BY: {__author__} | LAST UPDATED: {__dlu__}"""
