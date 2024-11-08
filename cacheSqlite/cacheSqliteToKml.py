@@ -41,8 +41,8 @@ def cacheSqliteToKml(
     number_of_rows = len(df)
 
     # Print verification message to screen.
-    c.print(f'\n[grey66]Found [dodger_blue1]{number_of_rows:,} \
-[grey66]rows of data\n')
+    c.print(f"""[grey66]
+  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
@@ -79,7 +79,7 @@ def cacheSqliteToKml(
             data_source = row['Data Source']
 
             # Print message to screen with each record number added.
-            c.print(f'[grey66]Processing Row #: [dodger_blue1]{record:,}')
+            c.print(f'  [grey66]Processing Row #: [dodger_blue1]{record:,}')
 
             # Write the data from each record to the output .kml file.
             kml_body = cacheSqliteKmlFileBody(

@@ -95,7 +95,7 @@ class HelperFunctions:
         output_kml_file: str,
         total_time: str,
         query_command_string: str,) -> None:
-        c.print('\n[light_goldenrod1]===== RESULTS =====')
+        c.print('\n  [light_goldenrod1]===== RESULTS =====')
 
         # Display the time frame between which the database records were
         # obtained.
