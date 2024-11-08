@@ -112,7 +112,8 @@ def main() -> None:
     # Get local time to print to screen when program begins.
     t = time.localtime()
     c.print(f"""
-[grey66]Program started: [dodger_blue1] {time.strftime("%m-%d-%Y at %H:%M:%S", t)}""")
+[grey66]Program started : [dodger_blue1]\
+{time.strftime("%m-%d-%Y at %H:%M:%S", t)} ET""")
 
     # Format the local time to append to the beginning of the output file name.
     file_time = time.strftime('%Y-%m-%d_%H%M%S', t)
