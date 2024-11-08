@@ -99,8 +99,8 @@ class HelperFunctions:
 
         # Display the time frame between which the database records were
         # obtained.
-        c.print(f"""
-  [-] Processed [dodger_blue1]{count:,} [grey66] records from the database\n
+        c.print(f"""[grey66]
+  [-] Processed [dodger_blue1]{count:,} [grey66]records from the database\n
   [-] Query Data\n
       Query command :
       [dodger_blue1]{query_command_string}\n
@@ -121,20 +121,19 @@ class HelperFunctions:
             pass
 
         # Show the name of the output .kml file (including appended date/time).
-        c.print(f"""
-  [grey66][-] The .kml file was created with [dodger_blue1]{count:,} \
+        c.print(f"""[grey66]
+  [-] The .kml file was created with [dodger_blue1]{count:,} \
 [grey66]line(s) of data. The .kml file is saved as :
       [dodger_blue1]{Path(output_kml_file).name}""")
 
         # Show directory where the output .kml file is saved.
-        c.print(f"""
-  [grey66][-] The results file(s) are saved in the following directory :
+        c.print(f"""[grey66]
+  [-] The results file(s) are saved in the following directory :
       [dodger_blue1]{Path(output_kml_file).parent}\\""")
 
         # Print the output to the screen.
-        c.print(f"""
-  [grey66]Program completed in [dodger_blue1]\
-{total_time:.4f} [grey66]seconds""")
+        c.print(f"""[grey66]
+  Program completed in [dodger_blue1]{total_time:.4f} [grey66]seconds""")
 
 
     def ask_open_output_kml_file(kml_file: Path) -> None:
