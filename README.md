@@ -18,7 +18,7 @@ create_kml_from_data.py
 - For the `--database` argument, enter the corresponding number for the database you want to examine:
   - 1 = **Cache.sqlite** (Location History),
   - 2 = **cache_encryptedB.db** (WiFi locations),
-  3 = **cache_encryptedB.db** (LTE locations),
-  4 = **Cloud-V2.sqlite** (Significant Locations),
-  5 = **Local.sqlite** (Significant Location Visits), or
-  6 = **Local.sqlite** (Vehicle Locations)
+  - 3 = **cache_encryptedB.db** (LTE locations),
+  - 4 = **Cloud-V2.sqlite** (Significant Locations),
+  - 5 = **Local.sqlite** (Significant Location Visits), or
+  - 6 = **Local.sqlite** (Vehicle Locations)
