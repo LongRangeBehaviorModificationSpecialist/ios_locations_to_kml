@@ -17,22 +17,19 @@ class HelperFunctions:
     def query_database(
             source: Path,
             query: str) -> str:
-        '''Query the Cache.sqlite database file.
+        """Query the Cache.sqlite database file.
 
         Returns: Pandas dataframe from the database query.
-        '''
+        """
+
         # Connect to the database.
         conn = sqlite3.connect(source)
-
         # Define your SQL query.
         sql_query = query
-
         # Execute the query and load results into a DataFrame.
         df = pd.read_sql_query(sql_query, conn)
-
         # Close the database connection.
         conn.close()
-
         # Return the dataframe.
         return df
 
@@ -41,8 +38,9 @@ class HelperFunctions:
             dest: Path,
             destf: str,
             time: str) -> str:
-        '''Add date/time and proper file extension to output file name.'''
-        output_kml_file = Path(f'{dest}\\{time}_{destf}.kml')
+        """Add date/time and proper file extension to output file name."""
+
+        output_kml_file = Path(f"{dest}\\{time}_{destf}.kml")
         return output_kml_file
 
 
@@ -50,39 +48,35 @@ class HelperFunctions:
             dest: Path,
             destf: str,
             time: str) -> str:
-        '''Get the file path to save the csv file, if selected.'''
-        output_csv_file = Path(f'{dest}\\{time}_{destf}.csv')
+        """Get the file path to save the csv file, if selected."""
+
+        output_csv_file = Path(f"{dest}\\{time}_{destf}.csv")
         return output_csv_file
 
 
     def convert_db_timestamp(timestamp: int) -> str:
-        '''Converts a Cocoa Core Data timestamp to local time.
-
+        """Converts a Cocoa Core Data timestamp to local time.
         Args:
             timestamp: A Cocoa Core Data timestamp, which is the number of
             seconds since midnight, January 1, 2001, GMT.
-
         Returns:
             A datetime object representing the local time equivalent of the
             given Cocoa Core Data timestamp.
-        '''
+        """
         # Convert the Cocoa Core Data timestamp to a Unix timestamp.
         unix_timestamp = timestamp + 978307200
-
         # Convert seconds since Unix epoch to datetime object
         dt_object = datetime.fromtimestamp(unix_timestamp)
-
-        # Format datetime object to '%m-%d-%Y %H:%M:%S' format
-        formatted_dt = dt_object.strftime('%a, %m-%d-%Y at %H:%M:%S %p')
-
+        # Format datetime object to "%m-%d-%Y %H:%M:%S" format
+        formatted_dt = dt_object.strftime("%a, %m-%d-%Y at %H:%M:%S %p")
         return formatted_dt
 
 
     def write_kml_closing() -> str:
-        kml_closing_text = '''
+        kml_closing_text = """
         </Folder>
     </Document>
-    </kml>'''
+    </kml>"""
         return kml_closing_text
 
 
@@ -95,10 +89,10 @@ class HelperFunctions:
         output_kml_file: str,
         total_time: str,
         query_command_string: str,) -> None:
-        c.print('\n  [light_goldenrod1]===== RESULTS =====')
 
-        # Display the time frame between which the database records were
-        # obtained.
+        c.print("\n  [light_goldenrod1]===== RESULTS =====")
+
+        # Display the time frame between which the database records were obtained.
         c.print(f"""[grey66]
   [-] Processed [dodger_blue1]{count:,} [grey66]records from the database\n
   [-] Query Data\n
@@ -123,7 +117,7 @@ class HelperFunctions:
         # Show the name of the output .kml file (including appended date/time).
         c.print(f"""[grey66]
   [-] The .kml file was created with [dodger_blue1]{count:,} \
-[grey66]line(s) of data. The .kml file is saved as :
+[grey66]data points. The .kml file is saved as :
       [dodger_blue1]{Path(output_kml_file).name}""")
 
         # Show directory where the output .kml file is saved.
@@ -140,11 +134,11 @@ class HelperFunctions:
         closing = """  [light_goldenrod1]>>> Exiting program..."""
 
         # Ask user if they want to open the output file.
-        choice = c.input("""[light_goldenrod1]
+        open_choice = c.input("""[light_goldenrod1]
   [-] Do you want to open the .kml file now? \[y/n] >> """)
 
-        # If the user enters 'y', the .kml file will be opened in Google Earth.
-        if choice.lower().strip() == 'y':
+        # If the user enters "y", the .kml file will be opened in Google Earth.
+        if open_choice.lower().strip() == "y":
 
             # Open the output file in Google Earth.
             c.print("""[dodger_blue1]
@@ -152,12 +146,12 @@ class HelperFunctions:
             webbrowser.open(kml_file)
 
             # Print closing message on the screen.
-            c.print(f'\n{closing}')
+            c.print(f"\n{closing}")
 
-        # If the user enteres anything other than 'y' the program will close.
+        # If the user enteres anything other than "y" the program will close.
         else:
             # Print closing message on the screen.
-            c.print(f'\n{closing}')
+            c.print(f"\n{closing}")
 
             # Exit the program.
             sys.exit(0)

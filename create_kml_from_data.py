@@ -40,7 +40,7 @@ Description:
     Create a .kml file by reading the location records from the \
 database specified in the `--db` option.
     The `--starttime` and `--endtime` values should be given in \
-Apple Absolute Time (a/k/a Cocoa Core Date) format.
+Apple Absolute Time (a/k/a Cocoa Core Data) format.
     To convert time values to/from the required input, see: \
 `https://www.gaijin.at/en/tools/time-converter`.
 
@@ -110,16 +110,16 @@ to examine:
         "--starttime",
         type=int,
         required=True,
-        help="[int] Timestamp of the first record to return (in Cocoa Core Date \
-format)."
+        help="[int] Timestamp of the first record to return (in Cocoa Core \
+Data format)."
     )
 
     parser.add_argument(
         "--endtime",
         type=int,
         required=True,
-        help="[int] Timestamp of the last record to return (in Cocoa Core Date \
-format)."
+        help="[int] Timestamp of the last record to return (in Cocoa Core \
+Data format)."
     )
 
     args = parser.parse_args()
