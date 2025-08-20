@@ -207,6 +207,7 @@ Data format)."
             file_time=file_time
         )
 
+
     elif db_type == 6:
         from localVehicleLoc.localVehicleLocToKml import localVehicleLocToKml
         localVehicleLocToKml(
