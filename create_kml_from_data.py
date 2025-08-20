@@ -24,27 +24,38 @@ def main() -> None:
         usage="`%(prog)s --help` for more information",
         description=f"""
 Description:
+
     create_kml_from_data.py version {__version__}
+
 Author:
+
     Michael Sponheimer (@mikespon)
+
 Last Updated:
+
     {__dlu__}
+
 Description:
+
     Create a .kml file by reading the location records from the \
 database specified in the `--db` option.
     The `--starttime` and `--endtime` values should be given in \
 Apple Absolute Time (a/k/a Cocoa Core Date) format.
     To convert time values to/from the required input, see: \
 `https://www.gaijin.at/en/tools/time-converter`.
+
 URL:
-    https://github.com/LongRangeBehaviorModificationSpecialist/ios_locations_to_kml
-Usage:
-    .\create_kml_from_data.py [options]
+
+    github.com/LongRangeBehaviorModificationSpecialist/ios_locations_to_kml
+
 Examples:
+
     python .\create_kml_from_data.py --source [SOURCE] --dest [DESTINATION] \
 --destf [DESTINATION_FILENAME] --csv [y,n] --db [DATABASE_CHOICE] --starttime \
 [START_TIME] --endtime [END_TIME]
+
 Notes:
+
     Enclose the full path in double quotes if it contains spaces."""
 )
 
