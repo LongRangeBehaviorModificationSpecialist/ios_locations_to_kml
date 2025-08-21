@@ -1,27 +1,30 @@
 # !/usr/bin/env python3
 
 def localVehicleLocSqlQuery(
-        begin_time: int,
+        start_time: int,
         end_time: int) -> str:
     LOCAL_VEH_LOC_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'Record',
+    ROW_NUMBER() OVER() AS 'Record_Number',
     Z_PK AS 'Z_PK',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZDATE + 978307200, 'UNIXEPOCH')) AS 'Date (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(ZDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Date (Local)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZLOCDATE + 978307200, 'UNIXEPOCH')) AS 'Location Date (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S ', datetime(ZLOCDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Location Date (Local)',
-    ZLOCLATITUDE AS 'Latitude',
-    ZLOCLONGITUDE AS 'Longitude',
-    ZLOCUNCERTAINTY AS 'Location Uncertainty',
+
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZDATE + 978307200, 'UNIXEPOCH')) AS 'DateTime(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZLOCDATE + 978307200, 'UNIXEPOCH')) AS 'LocationDate(UTC)',
+
+    ZLOCLATITUDE AS 'LATITUDE',
+    ZLOCLONGITUDE AS 'LONGITUDE',
+    ZLOCUNCERTAINTY AS 'LocationUncertainty',
     ZIDENTIFIER AS 'Identifier',
-    'Local.sqlite [ZRTVEHICLEEVENTHISTORYMO(Z_PK:' || Z_PK || ')]' AS 'Data Source'
+    'Local.sqlite [ZRTVEHICLEEVENTHISTORYMO(Z_PK:' || Z_PK || ')]' AS 'Data_Source'
 
-FROM ZRTVEHICLEEVENTHISTORYMO
+FROM
+    ZRTVEHICLEEVENTHISTORYMO
 
-WHERE ZDATE BETWEEN {begin_time} AND {end_time}
+WHERE
+    ZDATE BETWEEN {start_time} AND {end_time}
 
-ORDER BY ZDATE ASC
+ORDER BY
+    ZDATE ASC
 """
     return LOCAL_VEH_LOC_QUERY
 
@@ -96,16 +99,8 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[utc_time]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Date/Time (Local)</td>
-                      <td class="data">$[local_time]</td>
-                    </tr>
-                    <tr>
                       <td class="heading">Location Date/Time (UTC)</td>
                       <td class="data">$[location_time_utc]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Location Date/Time (Local)</td>
-                      <td class="data">$[location_time_local]</td>
                     </tr>
                     <tr>
                       <td class="heading">Latitude</td>
@@ -152,9 +147,7 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
 def localVehicleLocKmlFileBody(
         record: str,
         utc_time: str,
-        local_time: str,
         location_time_utc: str,
-        location_time_local: str,
         latitude: int,
         longitude: int,
         location_uncertainty: int,
@@ -166,7 +159,7 @@ def localVehicleLocKmlFileBody(
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{local_time[0:10]} at {local_time[11:19]} ET<br />
+            <p style="color:green">{utc_time[0:10]} at {utc_time[11:19]} UTC<br />
             [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
@@ -189,14 +182,8 @@ def localVehicleLocKmlFileBody(
           <Data name="utc_time">
             <value>{utc_time}</value>
           </Data>
-          <Data name="local_time">
-            <value>{local_time}</value>
-          </Data>
           <Data name="location_time_utc">
             <value>{location_time_utc}</value>
-          </Data>
-          <Data name="location_time_local">
-            <value>{location_time_local}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>

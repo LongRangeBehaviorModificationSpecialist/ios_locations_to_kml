@@ -5,34 +5,38 @@ def cacheEncBWifiSqlQuery(
         end_time: int) -> str:
     CACHE_ENCRYPTEDB_WIFI_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'RecordNo.',
+
+    ROW_NUMBER() OVER() AS 'Record_Number',
+
     UPPER(substr(printf("%0!.12x", MAC), 1, 2) || ':' ||
         substr(printf("%0!.12x", MAC), 3, 2) || ':' ||
         substr(printf("%0!.12x", MAC), 5, 2) || ':' ||
         substr(printf("%0!.12x", MAC), 7, 2) || ':' ||
         substr(printf("%0!.12x", MAC), 9, 2) || ':' ||
-        substr(printf("%0!.12x", MAC), 11, 2)) AS 'MACAddress',
+        substr(printf("%0!.12x", MAC), 11, 2)) AS 'MAC_Address',
+
     CASE Channel
-        WHEN '-1' THEN 'n/a'
+        WHEN -1 THEN '[N/A]'
         ELSE Channel
     END AS 'Channel',
+
     strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
-    strftime('%Y-%m-%d %H:%M:%S (Local)', datetime(Timestamp + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp(Local)',
+
     Latitude AS 'Latitude',
     Longitude AS 'Longitude',
     HorizontalAccuracy AS 'HorizontalAccuracy',
     Altitude AS 'Altitude',
     Confidence AS 'Confidence',
-    'cache_encryptedB.db(Table:WifiLocations)' AS 'DataSource'
+    'cache_encryptedB.db [Table:WifiLocation]' AS 'Data_Source'
 
-FROM WifiLocation
+FROM
+    WifiLocation
 
 WHERE
     Timestamp BETWEEN {start_time} AND {end_time}
-    AND (Latitude !=0)
-    OR (Longitude !=0)
 
-ORDER BY timestamp ASC
+ORDER BY
+    Timestamp ASC
 """
     return CACHE_ENCRYPTEDB_WIFI_QUERY
 
@@ -107,10 +111,6 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[date_time_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Date/Time (Local)</td>
-                      <td class="data">$[date_time_local]</td>
-                    </tr>
-                    <tr>
                       <td class="heading">Latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
@@ -166,7 +166,6 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
 
 def cacheEncBWifiKmlFileBody(
         record: str,
-        local_time: str,
         latitude: int,
         longitude: int,
         horiz_accuracy: str,
@@ -182,7 +181,7 @@ def cacheEncBWifiKmlFileBody(
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{local_time[0:10]} at {local_time[11:19]} ET<br />
+            <p style="color:green">{utc_time[0:10]} at {utc_time[11:19]} UTC<br />
             [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
@@ -204,9 +203,6 @@ def cacheEncBWifiKmlFileBody(
           </Data>
           <Data name="date_time_utc">
             <value>{utc_time}</value>
-          </Data>
-          <Data name="date_time_local">
-            <value>{local_time}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>

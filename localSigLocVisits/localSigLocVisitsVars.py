@@ -5,25 +5,31 @@ def localSigLocVisitSqlQuery(
         end_time: int) -> str:
     LOCAL_SIG_LOC_VISITS_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'Record',
+    ROW_NUMBER() OVER() AS 'Record_Number',
+
     Z_PK AS 'Z_PK',
-    ZDATAPOINTCOUNT AS 'Data Point Count',
-    ZLOCATIONOFINTEREST AS 'Location Of Interest ID',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'Creation Date (UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZENTRYDATE + 978307200, 'UNIXEPOCH')) AS 'Entry Date (UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXITDATE + 978307200, 'UNIXEPOCH')) AS 'Exit Date (UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'Expiration Date (UTC)',
-    ZLOCATIONLATITUDE AS 'Latitude',
-    ZLOCATIONLONGITUDE AS 'Longitude',
+    ZDATAPOINTCOUNT AS 'DataPointCount',
+    ZLOCATIONOFINTEREST AS 'LocationOfInterestID',
+
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'CreationDate(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZENTRYDATE + 978307200, 'UNIXEPOCH')) AS 'EntryDate(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXITDATE + 978307200, 'UNIXEPOCH')) AS 'ExitDate(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'ExpirationDate(UTC)',
+
+    ZLOCATIONLATITUDE AS 'LATITUDE',
+    ZLOCATIONLONGITUDE AS 'LONGITUDE',
     ZLOCATIONHORIZONTALUNCERTAINTY AS 'LocationHorizontalUncertainty',
     ZLOCATIONOFINTERESTCONFIDENCE AS 'LocationConfidence',
-    'Local.sqlite [ZRTLEARNEDLOCATIONOFINTERESTVISITMO(Z_PK:' || Z_PK || ')]' AS 'Data Source'
+    'Local.sqlite [ZRTLEARNEDLOCATIONOFINTERESTVISITMO(Z_PK:' || Z_PK || ')]' AS 'Data_Source'
 
-FROM ZRTLEARNEDLOCATIONOFINTERESTVISITMO
+FROM
+    ZRTLEARNEDLOCATIONOFINTERESTVISITMO
 
-WHERE ZCREATIONDATE BETWEEN {start_time} AND {end_time}
+WHERE
+    ZCREATIONDATE BETWEEN {start_time} AND {end_time}
 
-ORDER BY Z_PK ASC
+ORDER BY
+    Z_PK ASC
 """
     return LOCAL_SIG_LOC_VISITS_QUERY
 
@@ -94,11 +100,11 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                   </thead>
                   <tbody>
                     <tr>
-                      <td class="heading">Data Point Count</td>
+                      <td class="heading">DataPointCount</td>
                       <td class="data">$[data_point_count]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Location of Interest ID</td>
+                      <td class="heading">LocationOfInterest ID</td>
                       <td class="data">$[location_of_interest_id]</td>
                     </tr>
                     <tr>
@@ -110,31 +116,31 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Creation Date (UTC)</td>
+                      <td class="heading">CreationDate(UTC)</td>
                       <td class="data">$[creation_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Entry Date (UTC)</td>
+                      <td class="heading">EntryDate(UTC)</td>
                       <td class="data">$[entry_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Exit Date (UTC)</td>
+                      <td class="heading">ExitDate(UTC)</td>
                       <td class="data">$[exit_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Expiration Date (UTC)</td>
+                      <td class="heading">ExpirationDate(UTC)</td>
                       <td class="data">$[expiration_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Location Horiz Uncertainty</td>
+                      <td class="heading">LocationHorizUncertainty</td>
                       <td class="data">$[location_horiz_uncertainty]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Location Confidence</td>
+                      <td class="heading">LocationConfidence</td>
                       <td class="data">$[location_confidence]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Record Source</td>
+                      <td class="heading">Record_Source</td>
                       <td class="data">
                         <b>Table:</b><br/>
                         $[data_source]

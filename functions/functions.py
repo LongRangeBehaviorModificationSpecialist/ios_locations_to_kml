@@ -68,7 +68,7 @@ class HelperFunctions:
         # Convert seconds since Unix epoch to datetime object
         dt_object = datetime.fromtimestamp(unix_timestamp)
         # Format datetime object to "%m-%d-%Y %H:%M:%S" format
-        formatted_dt = dt_object.strftime("%a, %m-%d-%Y at %H:%M:%S %p")
+        formatted_dt = dt_object.strftime("%a, %d-%b-%Y at %H:%M:%S")
         return formatted_dt
 
 
@@ -82,7 +82,7 @@ class HelperFunctions:
 
     def end_program(
         number_of_rows: int,
-        begin_time: str,
+        start_time: str,
         end_time: str,
         output_csv_file: str,
         count: int,
@@ -94,36 +94,40 @@ class HelperFunctions:
 
         # Display the time frame between which the database records were obtained.
         c.print(f"""[grey66]
-  [-] Processed [dodger_blue1]{count:,} [grey66]records from the database\n
-  [-] Query Data\n
-      Query command :
-      [dodger_blue1]{query_command_string}\n
-      [grey66]Beginning Date/Time Input : [dodger_blue1]\
-{HelperFunctions.convert_db_timestamp(begin_time)}
-      [grey66]End Date/Time Input       : [dodger_blue1]\
+  Processed [dodger_blue1]{count:,} [grey66]records from the database
+
+  Query command :
+  [dodger_blue1]{query_command_string}
+
+  [grey66]Beginning Date/Time Input : [dodger_blue1] \
+{HelperFunctions.convert_db_timestamp(start_time)}
+  [grey66]End Date/Time Input       : [dodger_blue1] \
 {HelperFunctions.convert_db_timestamp(end_time)}""")
 
         try:
+
             if output_csv_file:
                 # Print verification that the .csv file was created.
                 c.print(f"""[grey66]
-  [-] The .csv file was created successfully. The file is saved as :
-      [dodger_blue1]{Path(output_csv_file).name}""")
+  The .csv file was created successfully. The file is saved as:
+  [dodger_blue1]{Path(output_csv_file).name}""")
+
             else:
                 pass
+
         except UnboundLocalError:
             pass
 
         # Show the name of the output .kml file (including appended date/time).
         c.print(f"""[grey66]
-  [-] The .kml file was created with [dodger_blue1]{count:,} \
-[grey66]data points. The .kml file is saved as :
-      [dodger_blue1]{Path(output_kml_file).name}""")
+  The .kml file was created with [dodger_blue1]{count:,} [grey66]records. The \
+.kml file is saved as:
+  [dodger_blue1]{Path(output_kml_file).name}""")
 
         # Show directory where the output .kml file is saved.
         c.print(f"""[grey66]
-  [-] The results file(s) are saved in the following directory :
-      [dodger_blue1]{Path(output_kml_file).parent}\\""")
+  The results file(s) are saved in the following directory:
+  [dodger_blue1]{Path(output_kml_file).parent}\\""")
 
         # Print the output to the screen.
         c.print(f"""[grey66]
@@ -131,11 +135,11 @@ class HelperFunctions:
 
 
     def ask_open_output_kml_file(kml_file: Path) -> None:
-        closing = """  [light_goldenrod1]>>> Exiting program..."""
+        closing = "  [light_goldenrod1]Exiting program..."
 
         # Ask user if they want to open the output file.
         open_choice = c.input("""[light_goldenrod1]
-  [-] Do you want to open the .kml file now? \[y/n] >> """)
+  Do you want to open the .kml file now? \[y/n] >> """)
 
         # If the user enters "y", the .kml file will be opened in Google Earth.
         if open_choice.lower().strip() == "y":

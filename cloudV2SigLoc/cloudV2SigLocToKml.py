@@ -23,7 +23,9 @@ def cacheV2SigLocToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
-    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}.kml" --csv {make_csv} --db 1 --starttime {start_time} --endtime {end_time}"""
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 1 --starttime {start_time} --endtime {end_time}"""
+
+    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Cloud-V2.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test" --csv y --db 4 --starttime 776779200 --endtime 776786400
 
     # Generate the SQL query to include the start_time and end_time values.
     CLOUDV2_SIG_LOC_QUERY = cloudV2SigLocSqlQuery(
@@ -41,8 +43,8 @@ def cacheV2SigLocToKml(
     number_of_rows = len(df)
 
     # Print verification message to screen.
-    c.print(f"\n[grey66]Found [dodger_blue1]{number_of_rows:,} \
-[grey66]rows of data\n")
+    c.print(f"""\n[grey66]
+  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
@@ -64,33 +66,32 @@ def cacheV2SigLocToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record"]
-            address_info = row["Address_Info"]
-            latitude = row["Latitude"]
-            longitude = row["Longitude"]
+            record = row["Record_Number"]
+            Z_PK = row["Z_PK"]
+            address_info = row["AddressInfo"]
+            probable_place_name = row["ProbablePlaceName"]
+            latitude = row["LATITUDE"]
+            longitude = row["LONGITUDE"]
             uncertainty = row["Uncertainty"]
-            add_create_utc = row["Address Creation Date (UTC)"]
-            add_create_local = row["Address Creation Date (Local)"]
-            zrtaddressmo_z_pk = row["ZRTADDRESSMO.Z_PK"]
-            add_expire_utc = row["Address Expire Date (UTC)"]
-            add_expire_local = row["Address Expire Date (Local)"]
-            data_source = row["Data Source"]
+            add_create_utc = row["AddressCreationDate(UTC)"]
+            add_expire_utc = row["AddressExpireDate(UTC)"]
+            data_source = row["Data_Source"]
 
             # Print message to screen with each record number added.
-            c.print(f"[grey66]Processing Row #: [dodger_blue1]{record:,}")
+            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:04d} \
+[grey66]| Z_PK# [dodger_blue1]{Z_PK}")
 
             # Write the data from each record to the output .kml file.
             kml_body = cloudV2SigLocKmlFileBody(
                 record=record,
+                Z_PK=Z_PK,
                 address_info=address_info,
+                probable_place_name=probable_place_name,
                 latitude=latitude,
                 longitude=longitude,
                 uncertainty=uncertainty,
                 add_create_utc=add_create_utc,
-                add_create_local=add_create_local,
-                zrtaddressmo_z_pk=zrtaddressmo_z_pk,
                 add_expire_utc=add_expire_utc,
-                add_expire_local=add_expire_local,
                 data_source=data_source
             )
 

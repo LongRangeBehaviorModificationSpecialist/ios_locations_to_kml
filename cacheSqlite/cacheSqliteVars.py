@@ -13,36 +13,45 @@ def cacheSqliteSqlQuery(
 
     CACHE_SQLITE_QUERY = f"""
 SELECT
+
     ROW_NUMBER() OVER() AS 'forDF',
-    ROW_NUMBER() OVER() AS 'Record',
+    ROW_NUMBER() OVER() AS 'Record_Number',
     ZRTCLLOCATIONMO.Z_PK AS 'Z_PK',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH')) AS 'Timestamp (UTC)',
-    strftime('%Y-%m-%d %H:%M:%S (Local)', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp (Local)',
+
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
+
     ZRTCLLOCATIONMO.ZLATITUDE AS 'LATITUDE',
     ZRTCLLOCATIONMO.ZLONGITUDE AS 'LONGITUDE',
+
     CASE ZRTCLLOCATIONMO.ZSPEED
-        WHEN -1 THEN '--'
+        WHEN -1 THEN '[N/A]'
         ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED, 4)
-    END AS 'Speed (meters/sec)',
+    END AS 'Speed(meters/sec)',
+
     CASE ZRTCLLOCATIONMO.ZSPEED
-        WHEN -1 THEN '--'
+        WHEN -1 THEN '[N/A]'
         ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED * 2.23694, 4)
-    END AS 'Speed (mph)',
+    END AS 'Speed(mph)',
+
     CASE ZRTCLLOCATIONMO.ZCOURSE
-        WHEN -1 THEN '--'
+        WHEN -1 THEN '[N/A]'
         ELSE ZRTCLLOCATIONMO.ZCOURSE
     END AS 'Course',
-    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY, 4) AS 'Horiz Accuracy (m)',
-    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY * 3.281, 4) AS 'Horiz Accuracy (feet)',
-    ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY, 4) AS 'Vertical Accuracy (m)',
-    ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY * 3.281, 4) AS 'Vertical Accuracy (feet)',
-    'Cache.sqlite [ZRTCLLOCATIONMO(Z_PK:' || ZRTCLLOCATIONMO.Z_PK || ')]' AS 'Data Source'
 
-FROM ZRTCLLOCATIONMO
+    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY, 4) AS 'Horiz_Accuracy(m)',
+    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY * 3.281, 4) AS 'Horiz_Accuracy(feet)',
+    ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY, 4) AS 'Vertical_Accuracy(m)',
+    ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY * 3.281, 4) AS 'Vertical_Accuracy(feet)',
+    'Cache.sqlite [ZRTCLLOCATIONMO(Z_PK:' || ZRTCLLOCATIONMO.Z_PK || ')]' AS 'Data_Source'
 
-WHERE ZRTCLLOCATIONMO.ZTIMESTAMP BETWEEN {start_time} AND {end_time}
+FROM
+    ZRTCLLOCATIONMO
 
-ORDER BY ZRTCLLOCATIONMO.ZTIMESTAMP ASC, ZRTCLLOCATIONMO.Z_PK
+WHERE
+    ZRTCLLOCATIONMO.ZTIMESTAMP BETWEEN {start_time} AND {end_time}
+
+ORDER BY
+    ZRTCLLOCATIONMO.ZTIMESTAMP ASC, ZRTCLLOCATIONMO.Z_PK
 """
     return CACHE_SQLITE_QUERY
 
@@ -118,10 +127,6 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[date_time_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Date/Time (Local)</td>
-                      <td class="data">$[date_time_local]</td>
-                    </tr>
-                    <tr>
                       <td class="heading">Latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
@@ -173,7 +178,6 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
 
 def cacheSqliteKmlFileBody(
         record: str,
-        local_time: str,
         latitude: int,
         longitude: int,
         course: str,
@@ -192,7 +196,7 @@ def cacheSqliteKmlFileBody(
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{local_time[0:10]} at {local_time[11:19]} ET<br />
+            <p style="color:green">{utc_time[0:10]} at {utc_time[11:19]} UTC<br />
             [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
@@ -214,9 +218,6 @@ def cacheSqliteKmlFileBody(
           </Data>
           <Data name="date_time_utc">
             <value>{utc_time}</value>
-          </Data>
-          <Data name="date_time_local">
-            <value>{local_time}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>

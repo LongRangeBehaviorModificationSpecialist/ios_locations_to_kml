@@ -21,41 +21,34 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         formatter_class=RawDescriptionHelpFormatter,
         prog="create_kml_from_data.py",
-        usage="`%(prog)s --help` for more information",
+        usage="'%(prog)s --help' for more information",
         description=f"""
 Description:
-
     create_kml_from_data.py version {__version__}
 
 Author:
-
     Michael Sponheimer (@mikespon)
 
 Last Updated:
-
     {__dlu__}
 
 Description:
-
     Create a .kml file by reading the location records from the \
-database specified in the `--db` option.
-    The `--starttime` and `--endtime` values should be given in \
+database specified in the '--db' option.
+    The '--starttime' and '--endtime' values should be given in \
 Apple Absolute Time (a/k/a Cocoa Core Data) format.
     To convert time values to/from the required input, see: \
-`https://www.gaijin.at/en/tools/time-converter`.
+'https://www.gaijin.at/en/tools/time-converter'.
 
 URL:
-
     github.com/LongRangeBehaviorModificationSpecialist/ios_locations_to_kml
 
 Examples:
-
     python .\create_kml_from_data.py --source [SOURCE] --dest [DESTINATION] \
 --destf [DESTINATION_FILENAME] --csv [y,n] --db [DATABASE_CHOICE] --starttime \
 [START_TIME] --endtime [END_TIME]
 
 Notes:
-
     Enclose the full path in double quotes if it contains spaces."""
 )
 
@@ -78,8 +71,8 @@ Notes:
         type=str,
         required=True,
         help="[str] File name of the resulting .kml file. The current date and \
-              time will be appended to the beginning of the file name with the \
-              following format: `year-month-day_hhmmss`."
+time will be appended to the beginning of the file name with the following \
+format: 'year-month-day_hhmmss'."
     )
 
     parser.add_argument(
@@ -87,7 +80,8 @@ Notes:
         type=str,
         choices=["y","n"],
         required=True,
-        help="[str] Create a .csv file with the results of the query."
+        help="[str] Create a .csv file with the results of the query ('y' or \
+'n')."
     )
 
     parser.add_argument(
@@ -226,3 +220,6 @@ Data format)."
 
 if __name__ == "__main__":
     main()
+
+
+# python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Cache.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test.kml" --csv y --db 1 --starttime 776779200 --endtime 776786400

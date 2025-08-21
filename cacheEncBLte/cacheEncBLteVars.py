@@ -5,11 +5,12 @@ def cacheEncBLteSqlQuery(
         end_time: int) -> str:
     CACHE_ENCRYPTEDB_LTE_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'RecordNo.',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(timestamp + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp(Local)',
-    Latitude AS 'Latitude',
-    Longitude AS 'Longitude',
+    ROW_NUMBER() OVER() AS 'Record_Number',
+
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
+
+    Latitude AS 'LATITUDE',
+    Longitude AS 'LONGITUDE',
     MCC AS 'MCC',
     MNC AS 'MNC',
     TAC AS 'TAC',
@@ -17,13 +18,16 @@ SELECT
     HorizontalAccuracy AS 'HorizontalAccuracy',
     Altitude AS 'Altitude',
     Confidence AS 'Confidence',
-    'cache_encryptedB.db(Table:LteCellLocations)' AS 'DataSource'
+    'cache_encryptedB.db [Table:LteCellLocation]' AS 'Data_Source'
 
-FROM LteCellLocation
+FROM
+    LteCellLocation
 
-WHERE timestamp BETWEEN {start_time} AND {end_time}
+WHERE
+    Timestamp BETWEEN {start_time} AND {end_time}
 
-ORDER BY timestamp ASC
+ORDER BY
+    Timestamp ASC
 """
     return CACHE_ENCRYPTEDB_LTE_QUERY
 
@@ -94,12 +98,8 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                   </thead>
                   <tbody>
                     <tr>
-                      <td class="heading">Date/Time (UTC)</td>
+                      <td class="heading">Date/Time(UTC)</td>
                       <td class="data">$[date_time_utc]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Date/Time (Local)</td>
-                      <td class="data">$[date_time_local]</td>
                     </tr>
                     <tr>
                       <td class="heading">Latitude</td>
@@ -153,7 +153,6 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
 
 def cacheEncBLteKmlFileBody(
         record: str,
-        local_time: str,
         latitude: int,
         longitude: int,
         horiz_accuracy: str,
@@ -168,7 +167,7 @@ def cacheEncBLteKmlFileBody(
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{local_time[0:10]} at {local_time[11:19]} ET<br />
+            <p style="color:green">{utc_time[0:10]} at {utc_time[11:19]} UTC<br />
             [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
@@ -190,9 +189,6 @@ def cacheEncBLteKmlFileBody(
           </Data>
           <Data name="date_time_utc">
             <value>{utc_time}</value>
-          </Data>
-          <Data name="date_time_local">
-            <value>{local_time}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>

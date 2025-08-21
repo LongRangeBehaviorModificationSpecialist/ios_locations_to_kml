@@ -23,7 +23,9 @@ def cacheSqliteToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
-    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}.kml" --csv {make_csv} --db 1 --starttime {start_time} --endtime {end_time}"""
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 1 --starttime {start_time} --endtime {end_time}"""
+
+    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Cache.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test" --csv y --db 1 --starttime 776779200 --endtime 776786400
 
     # Generate the SQL query to include the start_time and end_time values.
     CACHE_SQLITE_QUERY = cacheSqliteSqlQuery(
@@ -41,8 +43,8 @@ def cacheSqliteToKml(
     number_of_rows = len(df)
 
     # Print verification message to screen.
-    c.print(f"""[grey66]Found [dodger_blue1]{number_of_rows:,} \
-[grey66]rows of data\n""")
+    c.print(f"""\n[grey66]
+  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
@@ -64,23 +66,24 @@ def cacheSqliteToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record"]
+            record = row["Record_Number"]
             Z_PK = row["Z_PK"]
-            utc_time = row["Timestamp (UTC)"]
-            local_time = row["Timestamp (Local)"]
+            utc_time = row["Timestamp(UTC)"]
+            local_time = row["Timestamp(Local)"]
             latitude = row["LATITUDE"]
             longitude = row["LONGITUDE"]
-            speed_meters_per_sec = row["Speed (meters/sec)"]
-            speed_mph = row["Speed (mph)"]
+            speed_meters_per_sec = row["Speed(meters/sec)"]
+            speed_mph = row["Speed(mph)"]
             course = row["Course"]
-            horiz_acc_meters = row["Horiz Accuracy (m)"]
-            horiz_acc_feet = row["Horiz Accuracy (feet)"]
-            vert_acc_meters = row["Vertical Accuracy (m)"]
-            vert_acc_feet = row["Vertical Accuracy (feet)"]
-            data_source = row["Data Source"]
+            horiz_acc_meters = row["Horiz_Accuracy(m)"]
+            horiz_acc_feet = row["Horiz_Accuracy(feet)"]
+            vert_acc_meters = row["Vertical_Accuracy(m)"]
+            vert_acc_feet = row["Vertical_Accuracy(feet)"]
+            data_source = row["Data_Source"]
 
             # Print message to screen with each record number added.
-            c.print(f"  [grey66]Processing Row #: [dodger_blue1]{record:,}")
+            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:04d} \
+[grey66]| Z_PK# [dodger_blue1]{Z_PK}")
 
             # Write the data from each record to the output .kml file.
             kml_body = cacheSqliteKmlFileBody(

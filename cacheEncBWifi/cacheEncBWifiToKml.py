@@ -23,6 +23,10 @@ def cacheEncBWifiToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 2 --starttime {start_time} --endtime {end_time}"""
+
+    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\cache_encryptedB.db" --dest "C:\Users\mikes\Desktop" --destf "test.kml" --csv y --db 2 --starttime 776779200 --endtime 776786400
+
     # Generate the SQL query to include the start_time and end_time values.
     CACHE_ENCRYPTEDB_WIFI_QUERY = cacheEncBWifiSqlQuery(
         start_time=start_time,
@@ -39,8 +43,8 @@ def cacheEncBWifiToKml(
     number_of_rows = len(df)
 
     # Print verification message to screen.
-    c.print(f"\n[grey66]Found [dodger_blue1]{number_of_rows:,} \
-[grey66]rows of data\n")
+    c.print(f"""\n[grey66]
+  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
@@ -62,25 +66,25 @@ def cacheEncBWifiToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record"]
-            mac_address = row["MAC Address"]
-            utc_time = row["Timestamp (UTC)"]
-            local_time = row["Timestamp (Local)"]
+            record = row["Record_Number"]
+            mac_address = row["MAC_Address"]
+            utc_time = row["Timestamp(UTC)"]
             latitude = row["Latitude"]
             longitude = row["Longitude"]
             channel = row["Channel"]
             horiz_accuracy = row["HorizontalAccuracy"]
             altitude = row["Altitude"]
             confidence = row["Confidence"]
-            data_source = row["Data Source"]
+            data_source = row["Data_Source"]
 
             # Print message to screen with each record number added.
-            c.print(f"[grey66]Processing Row #: [dodger_blue1]{record:,}")
+            # DO NOT add Z_PK for this query -- the database table does not
+            # have a primary key.
+            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:04d}")
 
             # Write the data from each record to the output .kml file.
             kml_body = cacheEncBWifiKmlFileBody(
                 record=record,
-                local_time=local_time,
                 latitude=latitude,
                 longitude=longitude,
                 mac_address=mac_address,
@@ -124,6 +128,7 @@ def cacheEncBWifiToKml(
     total_time = ending_time - file_start_time
 
     hf.end_program(
+        query_command_string=query_command_string,
         number_of_rows=number_of_rows,
         start_time=start_time,
         end_time=end_time,

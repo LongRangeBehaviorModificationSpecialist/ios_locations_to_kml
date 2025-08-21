@@ -23,6 +23,10 @@ def localSigLocVisitToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 5 --starttime {start_time} --endtime {end_time}"""
+
+    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Local.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test" --csv y --db 5 --starttime 776779200 --endtime 776786400
+
     # Generate the SQL query to include the start_time and end_time values.
     LOCAL_SIG_LOC_VISIT_QUERY = localSigLocVisitSqlQuery(
         start_time=start_time,
@@ -39,8 +43,8 @@ def localSigLocVisitToKml(
     number_of_rows = len(df)
 
     # Print verification message to screen.
-    c.print(f"\n[grey66]Found [dodger_blue1]{number_of_rows:,} \
-[grey66]rows of data\n")
+    c.print(f"""\n[grey66]
+  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
@@ -62,21 +66,23 @@ def localSigLocVisitToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record"]
-            data_point_count = row["Data Point Count"]
-            location_of_interest_id = row["Location Of Interest ID"]
-            creation_date_utc = row["Creation Date (UTC)"]
-            entry_date_utc = row["Entry Date (UTC)"]
-            exit_date_utc = row["Exit Date (UTC)"]
-            expiration_date_utc = row["Expiration Date (UTC)"]
-            latitude = row["Latitude"]
-            longitude = row["Longitude"]
+            record = row["Record_Number"]
+            Z_PK = row["Z_PK"]
+            data_point_count = row["DataPointCount"]
+            location_of_interest_id = row["LocationOfInterestID"]
+            creation_date_utc = row["CreationDate(UTC)"]
+            entry_date_utc = row["EntryDate(UTC)"]
+            exit_date_utc = row["ExitDate(UTC)"]
+            expiration_date_utc = row["ExpirationDate(UTC)"]
+            latitude = row["LATITUDE"]
+            longitude = row["LONGITUDE"]
             location_horiz_uncertainty = row["LocationHorizontalUncertainty"]
             location_confidence = row["LocationConfidence"]
-            data_source = row["Data Source"]
+            data_source = row["Data_Source"]
 
             # Print message to screen with each record number added.
-            c.print(f"[grey66]Processing Row #: [dodger_blue1]{record:,}")
+            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:,} \
+[grey66]| Z_PK# [dodger_blue1]{Z_PK}")
 
             # Write the data from each record to the output .kml file.
             kml_body = localSigLocVisitKmlFileBody(
@@ -126,6 +132,7 @@ def localSigLocVisitToKml(
     total_time = ending_time - file_start_time
 
     hf.end_program(
+        query_command_string=query_command_string,
         number_of_rows=number_of_rows,
         start_time=start_time,
         end_time=end_time,

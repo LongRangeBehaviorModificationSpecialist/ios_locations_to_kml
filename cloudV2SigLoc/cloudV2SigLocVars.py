@@ -9,29 +9,33 @@ def cloudV2SigLocSqlQuery(
     """
     CLOUDV2_SIG_LOC_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'RecordNo.',
-    ZRTADDRESSMO.Z_PK AS 'ZRTADDRESSMO.Z_PK',
+    ROW_NUMBER() OVER() AS 'Record_Number',
+
+    ZRTADDRESSMO.Z_PK AS 'Z_PK',
+
     strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressCreationDate(UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'AddressCreationDate(Local)',
     strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressExpireDate(UTC)',
-    strftime('%Y-%m-%d %H:%M:%S', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH', 'localtime')) AS 'AddressExpireDate(Local)',
+
     ZRTADDRESSMO.ZSUBTHOROUGHFARE || ' ' ||
     REPLACE(ZRTADDRESSMO.ZTHOROUGHFARE, '&', 'at') || ', ' ||
     ZRTADDRESSMO.ZLOCALITY || ', ' ||
     ZRTADDRESSMO.ZADMINISTRATIVEAREA || ' ' ||
     ZRTADDRESSMO.ZPOSTALCODE || ' ' ||
     ZRTADDRESSMO.ZCOUNTRYCODE AS 'AddressInfo',
-    ZRTMAPITEMMO.ZLATITUDE AS 'Latitude',
-    ZRTMAPITEMMO.ZLONGITUDE AS 'Longitude',
+    ZRTMAPITEMMO.ZLATITUDE AS 'LATITUDE',
+    ZRTMAPITEMMO.ZLONGITUDE AS 'LONGITUDE',
+    ZRTMAPITEMMO.ZNAME AS 'ProbablePlaceName',
     ZRTMAPITEMMO.ZUNCERTAINTY AS 'Uncertainty',
-    'Cloud-V2.sqlite [ZRTADDRESSMO(Z_PK:' || ZRTADDRESSMO.Z_PK || ')]' AS 'DataSource'
+    'Cloud-V2.sqlite [ZRTADDRESSMO(Z_PK:' || ZRTADDRESSMO.Z_PK || ')]' AS 'Data_Source'
 
 FROM ZRTADDRESSMO
     LEFT JOIN ZRTMAPITEMMO ON ZRTADDRESSMO.ZMAPITEM = ZRTMAPITEMMO.ZADDRESS
 
-WHERE ZRTADDRESSMO.ZCREATIONDATE BETWEEN {start_time} AND {end_time}
+WHERE
+    ZRTADDRESSMO.ZCREATIONDATE BETWEEN {start_time} AND {end_time}
 
-ORDER BY ZRTADDRESSMO.Z_PK ASC
+ORDER BY
+    ZRTADDRESSMO.Z_PK ASC
 """
     return CLOUDV2_SIG_LOC_QUERY
 
@@ -106,11 +110,15 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[address_info]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Latitude</td>
+                      <td class="heading">ProbablePlaceName</td>
+                      <td class="data">$[probable_place_name]</td>
+                    </tr>
+                    <tr>
+                      <td class="heading">LATITUDE</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Longitude</td>
+                      <td class="heading">LONGITUDE</td>
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
@@ -118,24 +126,16 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[uncertainty]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Address Creation Date (UTC)</td>
+                      <td class="heading">AddressCreationDate(UTC)</td>
                       <td class="data">$[add_create_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Address Creation Date (Local)</td>
-                      <td class="data">$[add_create_local]</td>
+                      <td class="heading">ZRTADDRESSMO Record No.</td>
+                      <td class="data">$[Z_PK]</td>
                     </tr>
                     <tr>
-                      <td class="heading">ZRTADDRESSMO PK No.</td>
-                      <td class="data">$[zrtaddressmo_zpk]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Address Expire Date (UTC)</td>
+                      <td class="heading">AddressExpireDate(UTC)</td>
                       <td class="data">$[add_expire_utc]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Address Expire Date (Local)</td>
-                      <td class="data">$[add_expire_local]</td>
                     </tr>
                     <tr>
                       <td class="heading">Record Source</td>
@@ -165,15 +165,14 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
 
 def cloudV2SigLocKmlFileBody(
         record: str,
+        Z_PK: str,
         address_info: str,
+        probable_place_name: str,
         latitude: int,
         longitude: int,
         uncertainty: int,
         add_create_utc: str,
-        add_create_local: str,
-        zrtaddressmo_z_pk: str,
         add_expire_utc: str,
-        add_expire_local: str,
         data_source: str) -> str:
     CLOUDV2_SIG_LOC_KML_FILE_BODY = f"""
       <Placemark>
@@ -181,7 +180,7 @@ def cloudV2SigLocKmlFileBody(
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{add_create_local[0:10]} at {add_create_local[11:19]} ET<br />
+            <p style="color:green">{add_create_utc[0:10]} at {add_create_utc[11:19]} UTC<br />
             {address_info}<br />
             ({latitude:.6f},{longitude:.6f})</p>
             ]]>
@@ -202,8 +201,14 @@ def cloudV2SigLocKmlFileBody(
           <Data name="rowid_text">
             <value>{str(record).zfill(6)}</value>
           </Data>
+          <Data name="z_pk">
+            <value>{Z_PK}</value>
+          </Data>
           <Data name="address_info">
             <value>{address_info}</value>
+          </Data>
+          <Data name="probable_place_name">
+            <value>{probable_place_name}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>
@@ -217,17 +222,8 @@ def cloudV2SigLocKmlFileBody(
           <Data name="add_create_utc">
             <value>{add_create_utc}</value>
           </Data>
-          <Data name="add_create_local">
-            <value>{add_create_local}</value>
-          </Data>
-          <Data name="zrtaddressmo_zpk">
-            <value>{zrtaddressmo_z_pk}</value>
-          </Data>
           <Data name="add_expire_utc">
             <value>{add_expire_utc}</value>
-          </Data>
-          <Data name="add_expire_local">
-            <value>{add_expire_local}</value>
           </Data>
           <Data name="data_source">
             <value>{data_source}</value>
