@@ -33,10 +33,10 @@ Last Updated:
     {__dlu__}
 
 Description:
-    Create a .kml file by reading the location records from the \
-database specified in the '--db' option.
-    The '--starttime' and '--endtime' values should be given in \
-Apple Absolute Time (a/k/a Cocoa Core Data) format.
+    Create a .kml file by reading the location records from the database \
+specified in the '--db' option.
+    The '--starttime' and '--endtime' values should be given in Apple Absolute \
+Time (a/k/a Cocoa Core Data) format.
     To convert time values to/from the required input, see: \
 'https://www.gaijin.at/en/tools/time-converter'.
 
@@ -56,7 +56,8 @@ Notes:
         "--source",
         type=Path,
         required=True,
-        help="[str] Directory where database file is located."
+        help="[str] Directory where database file is located (include file \
+name in path)."
     )
 
     parser.add_argument(
