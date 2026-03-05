@@ -19,9 +19,12 @@ SELECT
     ZRTCLLOCATIONMO.Z_PK AS 'Z_PK',
 
     strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%S', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp(Local)',
 
     ZRTCLLOCATIONMO.ZLATITUDE AS 'LATITUDE',
     ZRTCLLOCATIONMO.ZLONGITUDE AS 'LONGITUDE',
+
+    RTRIM(LTRIM(CONCAT(ROUND(ZRTCLLOCATIONMO.ZLATITUDE, 6), ',', ROUND(ZRTCLLOCATIONMO.ZLONGITUDE, 6)))) AS 'GPS(Merged)',
 
     CASE ZRTCLLOCATIONMO.ZSPEED
         WHEN -1 THEN '[N/A]'
@@ -127,12 +130,20 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[date_time_utc]</td>
                     </tr>
                     <tr>
+                      <td class="heading">Date/Time (Local)</td>
+                      <td class="data">$[date_time_local]</td>
+                    </tr>
+                    <tr>
                       <td class="heading">Latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
                       <td class="heading">Longitude</td>
                       <td class="data">$[longitude]</td>
+                    </tr>
+                    <tr>
+                      <td class="heading">Combined GPS</td>
+                      <td class="data">$[loc_combined]</td>
                     </tr>
                     <tr>
                       <td class="heading">Speed</td>
@@ -180,9 +191,11 @@ def cacheSqliteKmlFileBody(
         record: str,
         latitude: int,
         longitude: int,
+        loc_combined: str,
         course: str,
         horiz_acc_meters: str,
         utc_time: str,
+        local_time: str,
         speed_meters_per_sec: str,
         speed_mph: str,
         horiz_acc_feet: str,
@@ -219,11 +232,17 @@ def cacheSqliteKmlFileBody(
           <Data name="date_time_utc">
             <value>{utc_time}</value>
           </Data>
+          <Data name="date_time_local">
+            <value>{local_time}</value>
+          </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>
           </Data>
           <Data name="longitude">
             <value>{longitude:.6f}</value>
+          </Data>
+          <Data name="loc_combined">
+            <value>{loc_combined}</value>
           </Data>
           <Data name="speed">
             <value>{speed_meters_per_sec} mps ({speed_mph} mph)</value>

@@ -72,6 +72,7 @@ def cacheSqliteToKml(
             local_time = row["Timestamp(Local)"]
             latitude = row["LATITUDE"]
             longitude = row["LONGITUDE"]
+            loc_combined = row["GPS(Merged)"]
             speed_meters_per_sec = row["Speed(meters/sec)"]
             speed_mph = row["Speed(mph)"]
             course = row["Course"]
@@ -91,6 +92,7 @@ def cacheSqliteToKml(
                 local_time=local_time,
                 latitude=latitude,
                 longitude=longitude,
+                loc_combined=loc_combined,
                 course=course,
                 horiz_acc_meters=horiz_acc_meters,
                 utc_time=utc_time,
