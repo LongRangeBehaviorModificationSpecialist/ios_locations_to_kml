@@ -80,7 +80,7 @@ def cacheEncBWifiToKml(
             # Print message to screen with each record number added.
             # DO NOT add Z_PK for this query -- the database table does not
             # have a primary key.
-            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:04d}")
+            c.print(f"    [grey66]Processing Row # [dodger_blue1]{record:04d}")
 
             # Write the data from each record to the output .kml file.
             kml_body = cacheEncBWifiKmlFileBody(

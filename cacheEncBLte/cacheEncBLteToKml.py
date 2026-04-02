@@ -80,7 +80,7 @@ def cacheEncBLteToKml(
             data_source = row["Data_Source"]
 
             # Print message to screen with each record number added.
-            c.print(f"  [grey66]Processing Row # [dodger_blue1]{record:04d}")
+            c.print(f"    [grey66]Processing Row # [dodger_blue1]{record:04d}")
 
             site_info = f"MCC: {mcc} | MNC: {mnc} | TAC: {tac} | CI: {ci}"
 

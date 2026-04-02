@@ -133,12 +133,12 @@ Data format)."
 
     # Print the local time when the script began.
     c.print(f"""[grey66]
-=================================\n
+  =================================
 
     Program started : [dodger_blue1]\
-{time.strftime("%d-%b-%Y at %H:%M:%S", t)} ET\n
+{time.strftime("%d-%b-%Y at %H:%M:%S", t)} ET
 
-[grey66]=================================""")
+  [grey66]=================================""")
 
     # Format the local time to append to the beginning of the output file name.
     file_time = time.strftime("%Y-%m-%d_%H%M%S", t)
