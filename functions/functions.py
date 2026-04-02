@@ -101,9 +101,9 @@ class HelperFunctions:
 [-] Query command :
     [dodger_blue1]{query_command_string}
 
-    [grey66]Beginning Date/Time Input (Local)  : [dodger_blue1] \
+    [grey66]Beginning Date/Time Input (Local Time)  : [dodger_blue1] \
 {HelperFunctions.convert_db_timestamp(start_time)}
-    [grey66]End Date/Time Input (Local)        : [dodger_blue1] \
+    [grey66]End Date/Time Input (Local Time)        : [dodger_blue1] \
 {HelperFunctions.convert_db_timestamp(end_time)}""")
 
         try:

@@ -133,10 +133,10 @@ Data format)."
 
     # Print the local time when the script began.
     c.print(f"""[grey66]
-=================================
+=================================\n
 
     Program started : [dodger_blue1]\
-{time.strftime("%d-%b-%Y at %H:%M:%S", t)} ET
+{time.strftime("%d-%b-%Y at %H:%M:%S", t)} ET\n
 
 [grey66]=================================""")
 

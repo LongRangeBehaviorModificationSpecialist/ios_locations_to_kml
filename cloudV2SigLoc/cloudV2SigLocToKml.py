@@ -44,7 +44,7 @@ def cacheV2SigLocToKml(
 
     # Print verification message to screen.
     c.print(f"""\n[grey66]
-  Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
+[-] Found [dodger_blue1]{number_of_rows:,} [grey66]rows of data\n""")
 
     # Set output file to the correct format.
     output_kml_file = hf.get_destf_name(
