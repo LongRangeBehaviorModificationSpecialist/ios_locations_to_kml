@@ -8,7 +8,7 @@ from rich.console import Console
 
 
 __author__ = "@mikespon"
-__dlu__ = "20-Aug-2025"
+__dlu__ = "02-Apr"
 __version__ = "1.2"
 
 # Create the console object.
@@ -27,7 +27,7 @@ Description:
     create_kml_from_data.py version {__version__}
 
 Author:
-    Michael Sponheimer (@mikespon)
+    {__author__}
 
 Last Updated:
     {__dlu__}
@@ -88,7 +88,7 @@ format: 'year-month-day_hhmmss'."
     parser.add_argument(
         "--db",
         type=int,
-        choices=[1,2,3,4,5,6],
+        choices=[1, 2, 3, 4, 5, 6],
         required=True,
         help="""[int] Type of location data you want to examine. Enter the \
 corresponding number for the database/table containing the records you want \
@@ -133,10 +133,12 @@ Data format)."
 
     # Print the local time when the script began.
     c.print(f"""[grey66]
-  =================================
-  Program started : [dodger_blue1] \
+=================================
+
+    Program started : [dodger_blue1]\
 {time.strftime("%d-%b-%Y at %H:%M:%S", t)} ET
-  [grey66]=================================""")
+
+[grey66]=================================""")
 
     # Format the local time to append to the beginning of the output file name.
     file_time = time.strftime("%Y-%m-%d_%H%M%S", t)
