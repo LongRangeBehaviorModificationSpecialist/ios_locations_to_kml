@@ -1,48 +1,83 @@
 # !/usr/bin/env python3
 
-def localSigLocVisitSqlQuery(
+def cache_sqlite_query(
         start_time: int,
         end_time: int) -> str:
-    LOCAL_SIG_LOC_VISITS_QUERY = f"""
+    """Adds the `start_time` and `end_time` values to the SQL query that will
+    be run against the Cache.sqlite database file so that only records during
+    the desired time frame are returned
+
+    Time stamps in this database are stored in `CF Absolute Time` a/k/a/
+    `Cocoa Core Data` time.
+    """
+
+    CACHE_SQLITE_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'Record_Number',
 
-    Z_PK AS 'Z_PK',
-    ZDATAPOINTCOUNT AS 'DataPointCount',
-    ZLOCATIONOFINTEREST AS 'LocationOfInterestID',
+    ROW_NUMBER() OVER() AS 'forDF',
+    ROW_NUMBER() OVER() AS 'record_number',
+    ZRTCLLOCATIONMO.Z_PK AS 'z_pk',
 
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'CreationDate(UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZENTRYDATE + 978307200, 'UNIXEPOCH')) AS 'EntryDate(UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXITDATE + 978307200, 'UNIXEPOCH')) AS 'ExitDate(UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'ExpirationDate(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH')) AS 'timestamp_utc',
+    strftime('%Y-%m-%dT%H:%M:%S', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH', 'localtime')) AS 'timestamp_local',
 
-    ZLOCATIONLATITUDE AS 'LATITUDE',
-    ZLOCATIONLONGITUDE AS 'LONGITUDE',
-    ZLOCATIONHORIZONTALUNCERTAINTY AS 'LocationHorizontalUncertainty',
-    ZLOCATIONOFINTERESTCONFIDENCE AS 'LocationConfidence',
-    'Local.sqlite [ZRTLEARNEDLOCATIONOFINTERESTVISITMO(Z_PK:' || Z_PK || ')]' AS 'Data_Source'
+    ZRTCLLOCATIONMO.ZLATITUDE AS 'latitude',
+    ZRTCLLOCATIONMO.ZLONGITUDE AS 'longitude',
+
+    RTRIM(LTRIM(CONCAT(ROUND(ZRTCLLOCATIONMO.ZLATITUDE, 6), ',', ROUND(ZRTCLLOCATIONMO.ZLONGITUDE, 6)))) AS 'gps_merged',
+
+    CASE ZRTCLLOCATIONMO.ZSPEED
+        WHEN -1.0 THEN NULL
+        ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED, 4)
+    END AS 'speed_meters_sec',
+
+    CASE ZRTCLLOCATIONMO.ZSPEED
+        WHEN -1.0 THEN NULL
+        ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED * 2.23694, 4)
+    END AS 'speed_mph',
+
+    CASE ZRTCLLOCATIONMO.ZCOURSE
+        WHEN -1.0 THEN NULL
+        ELSE ZRTCLLOCATIONMO.ZCOURSE
+    END AS 'course',
+
+    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY, 4) AS 'horiz_accuracy_meters',
+    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY * 3.281, 4) AS 'horiz_accuracy_feet',
+
+    CASE ZRTCLLOCATIONMO.ZVERTICALACCURACY
+        WHEN -1.0 THEN NULL
+        ELSE ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY, 4)
+    END AS 'vertical_accuracy_meters',
+
+    CASE ZRTCLLOCATIONMO.ZVERTICALACCURACY
+        WHEN -1.0 THEN NULL
+        ELSE ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY * 3.281, 4)
+    END AS 'vertical_accuracy_feet',
+
+    'Cache.sqlite [ZRTCLLOCATIONMO(Z_PK:' || ZRTCLLOCATIONMO.Z_PK || ')]' AS 'data_source'
 
 FROM
-    ZRTLEARNEDLOCATIONOFINTERESTVISITMO
+    ZRTCLLOCATIONMO
 
 WHERE
-    ZCREATIONDATE BETWEEN {start_time} AND {end_time}
+    ZRTCLLOCATIONMO.ZTIMESTAMP BETWEEN {start_time} AND {end_time}
 
 ORDER BY
-    Z_PK ASC
+    ZRTCLLOCATIONMO.ZTIMESTAMP ASC, ZRTCLLOCATIONMO.Z_PK
 """
-    return LOCAL_SIG_LOC_VISITS_QUERY
+    return CACHE_SQLITE_QUERY
 
 
-def localSigLocVisitKmlFileHeader() -> str:
-    LOCAL_SIG_LOC_VISITS_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
+
+def cache_sqlite_kml_file_header() -> str:
+    CACHE_SQLITE_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"
   xmlns:gx="http://www.google.com/kml/ext/2.2"
   xmlns:kml="http://www.opengis.net/kml/2.2"
   xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     <Folder>
-      <name>Significant Location Visits Local.sqlite</name>
+      <name>Locations From Cache.sqlite</name>
       <open>1</open>
       <description>View All Records</description>
       <Style id="recordfolder">
@@ -100,47 +135,43 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                   </thead>
                   <tbody>
                     <tr>
-                      <td class="heading">DataPointCount</td>
-                      <td class="data">$[data_point_count]</td>
+                      <td class="heading">Date/Time (UTC)</td>
+                      <td class="data">$[date_time_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">LocationOfInterest ID</td>
-                      <td class="data">$[location_of_interest_id]</td>
+                      <td class="heading">Date/Time (Local)</td>
+                      <td class="data">$[date_time_local]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Latitude</td>
+                      <td class="heading">latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Longitude</td>
+                      <td class="heading">longitude</td>
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">CreationDate(UTC)</td>
-                      <td class="data">$[creation_date_utc]</td>
+                      <td class="heading">Combined GPS</td>
+                      <td class="data">$[loc_combined]</td>
                     </tr>
                     <tr>
-                      <td class="heading">EntryDate(UTC)</td>
-                      <td class="data">$[entry_date_utc]</td>
+                      <td class="heading">Speed</td>
+                      <td class="data">$[speed]</td>
                     </tr>
                     <tr>
-                      <td class="heading">ExitDate(UTC)</td>
-                      <td class="data">$[exit_date_utc]</td>
+                      <td class="heading">Course</td>
+                      <td class="data">$[course]</td>
                     </tr>
                     <tr>
-                      <td class="heading">ExpirationDate(UTC)</td>
-                      <td class="data">$[expiration_date_utc]</td>
+                      <td class="heading">Horiz. Accuracy</td>
+                      <td class="data">$[horiz_accuracy]</td>
                     </tr>
                     <tr>
-                      <td class="heading">LocationHorizUncertainty</td>
-                      <td class="data">$[location_horiz_uncertainty]</td>
+                      <td class="heading">Vertical Accuracy</td>
+                      <td class="data">$[vert_accuracy]</td>
                     </tr>
                     <tr>
-                      <td class="heading">LocationConfidence</td>
-                      <td class="data">$[location_confidence]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Record_Source</td>
+                      <td class="heading">Record Source</td>
                       <td class="data">
                         <b>Table:</b><br/>
                         $[data_source]
@@ -162,29 +193,32 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
         </ListStyle>
       </Style>
 """
-    return LOCAL_SIG_LOC_VISITS_KML_FILE_HEADER
+    return CACHE_SQLITE_KML_FILE_HEADER
 
 
-def localSigLocVisitKmlFileBody(
+def cache_sqlite_kml_file_body(
         record: str,
-        data_point_count: int,
-        location_of_interest_id: int,
-        creation_date_utc: str,
-        entry_date_utc: str,
-        exit_date_utc: str,
-        expiration_date_utc: str,
         latitude: int,
         longitude: int,
-        location_horiz_uncertainty: int,
-        location_confidence: int,
-        data_source: str) -> str:
-    LOCAL_SIG_LOC_VISITS_KML_FILE_BODY = f"""
+        loc_combined: str,
+        course: str,
+        horiz_acc_meters: str,
+        utc_time: str,
+        local_time: str,
+        speed_meters_per_sec: str,
+        speed_mph: str,
+        horiz_acc_feet: str,
+        vert_acc_meters: str,
+        vert_acc_feet: str,
+        data_source: str) -> None:
+
+    file_body = f"""
       <Placemark>
         <name>{str(record).zfill(6)}</name>
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{creation_date_utc[0:10]} at {creation_date_utc[11:19]} UTC<br />
+            <p style="color:green">{utc_time[0:10]} at {utc_time[11:19]} UTC<br />
             [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
@@ -192,23 +226,23 @@ def localSigLocVisitKmlFileBody(
           <longitude>{longitude}</longitude>
           <latitude>{latitude}</latitude>
           <altitude>0</altitude>
-          <heading>0</heading>
+          <heading>{course}</heading>
           <tilt>0</tilt>
-          <range>0</range>
+          <range>{horiz_acc_meters}</range>
         </LookAt>
         <TimeStamp>
-          <when>{creation_date_utc}</when>
+          <when>{utc_time}</when>
         </TimeStamp>
         <styleUrl>#recordfolder</styleUrl>
         <ExtendedData>
           <Data name="rowid_text">
             <value>{str(record).zfill(6)}</value>
           </Data>
-          <Data name="data_point_count">
-            <value>{data_point_count}</value>
+          <Data name="date_time_utc">
+            <value>{utc_time}</value>
           </Data>
-          <Data name="location_of_interest_id">
-            <value>{location_of_interest_id}</value>
+          <Data name="date_time_local">
+            <value>{local_time}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>
@@ -216,23 +250,20 @@ def localSigLocVisitKmlFileBody(
           <Data name="longitude">
             <value>{longitude:.6f}</value>
           </Data>
-          <Data name="creation_date_utc">
-            <value>{creation_date_utc}</value>
+          <Data name="loc_combined">
+            <value>{loc_combined}</value>
           </Data>
-          <Data name="entry_date_utc">
-            <value>{entry_date_utc}</value>
+          <Data name="speed">
+            <value>{speed_meters_per_sec} mps ({speed_mph} mph)</value>
           </Data>
-          <Data name="exit_date_utc">
-            <value>{exit_date_utc}</value>
+          <Data name="course">
+            <value>{course}</value>
           </Data>
-          <Data name="expiration_date_utc">
-            <value>{expiration_date_utc}</value>
+          <Data name="horiz_accuracy">
+            <value>{horiz_acc_meters} meters ({horiz_acc_feet} feet)</value>
           </Data>
-          <Data name="location_horiz_uncertainty">
-            <value>{location_horiz_uncertainty:.6f} meters</value>
-          </Data>
-          <Data name="location_confidence">
-            <value>{location_confidence:.6f}</value>
+          <Data name="vert_accuracy">
+            <value>{vert_acc_meters} meters ({vert_acc_feet} feet)</value>
           </Data>
           <Data name="data_source">
             <value>{data_source}</value>
@@ -241,6 +272,6 @@ def localSigLocVisitKmlFileBody(
         <Point>
           <coordinates>{longitude},{latitude},0</coordinates>
         </Point>
-      </Placemark>
-"""
-    return LOCAL_SIG_LOC_VISITS_KML_FILE_BODY
+      </Placemark>\n"""
+
+    return file_body

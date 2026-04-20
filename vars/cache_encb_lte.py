@@ -1,24 +1,24 @@
 # !/usr/bin/env python3
 
-def cacheEncBLteSqlQuery(
+def cache_encb_db_lte_query(
         start_time: int,
         end_time: int) -> str:
     CACHE_ENCRYPTEDB_LTE_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'Record_Number',
+    ROW_NUMBER() OVER() AS 'record_number',
 
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(Timestamp + 978307200, 'UNIXEPOCH')) AS 'timestamp_utc',
 
-    Latitude AS 'LATITUDE',
-    Longitude AS 'LONGITUDE',
-    MCC AS 'MCC',
-    MNC AS 'MNC',
-    TAC AS 'TAC',
-    CI AS 'CI',
-    HorizontalAccuracy AS 'HorizontalAccuracy',
-    Altitude AS 'Altitude',
-    Confidence AS 'Confidence',
-    'cache_encryptedB.db [Table:LteCellLocation]' AS 'Data_Source'
+    latitude AS 'latitude',
+    Longitude AS 'longitude',
+    MCC AS 'mcc',
+    MNC AS 'mnc',
+    TAC AS 'tac',
+    CI AS 'ci',
+    HorizontalAccuracy AS 'horizontal_accuracy',
+    Altitude AS 'altitude',
+    Confidence AS 'confidence',
+    'cache_encryptedB.db [Table:LteCellLocation]' AS 'data_source'
 
 FROM
     LteCellLocation
@@ -32,7 +32,7 @@ ORDER BY
     return CACHE_ENCRYPTEDB_LTE_QUERY
 
 
-def cacheEncBLteKmlFileHeader() -> str:
+def cache_encb_db_lte_kml_file_header() -> str:
     CACHE_ENCRYPTEDB_LTE_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"
   xmlns:gx="http://www.google.com/kml/ext/2.2"
@@ -102,11 +102,11 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                       <td class="data">$[date_time_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Latitude</td>
+                      <td class="heading">latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Longitude</td>
+                      <td class="heading">longitude</td>
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
@@ -151,7 +151,7 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
     return CACHE_ENCRYPTEDB_LTE_KML_FILE_HEADER
 
 
-def cacheEncBLteKmlFileBody(
+def cache_encb_db_lte_kml_file_body(
         record: str,
         latitude: int,
         longitude: int,

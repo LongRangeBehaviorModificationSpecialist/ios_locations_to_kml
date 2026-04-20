@@ -4,14 +4,14 @@ from rich.console import Console
 import time
 
 from functions.functions import HelperFunctions as hf
-from localSigLocVisits.localSigLocVisitsVars import(
-    localSigLocVisitSqlQuery,
-    localSigLocVisitKmlFileHeader,
-    localSigLocVisitKmlFileBody)
+from vars.cloud_v2_sqlite_signif_loc import(
+    cloud_v2_sqlite_signif_loc_query,
+    cloud_v2_sqlite_signif_loc_kml_file_header,
+    cloud_v2_sqlite_signif_loc_kml_file_body)
 
 c = Console()
 
-def localSigLocVisitToKml(
+def write_cache_v2_signif_loc_to_kml(
         source: str,
         dest: str,
         destf: str,
@@ -23,21 +23,17 @@ def localSigLocVisitToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
-    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 5 --starttime {start_time} --endtime {end_time}"""
-
-    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Local.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test" --csv y --db 5 --starttime 776779200 --endtime 776786400
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 1 --starttime {start_time} --endtime {end_time}"""
 
     # Generate the SQL query to include the start_time and end_time values.
-    LOCAL_SIG_LOC_VISIT_QUERY = localSigLocVisitSqlQuery(
+    CLOUDV2_SIG_LOC_QUERY = cloud_v2_sqlite_signif_loc_query(
         start_time=start_time,
-        end_time=end_time
-    )
+        end_time=end_time)
 
     # Query the database file.
     df = hf.query_database(
         source=source,
-        query=LOCAL_SIG_LOC_VISIT_QUERY
-    )
+        query=CLOUDV2_SIG_LOC_QUERY)
 
     # Get the total number of records in the worksheet.
     number_of_rows = len(df)
@@ -50,14 +46,13 @@ def localSigLocVisitToKml(
     output_kml_file = hf.get_destf_name(
         dest=dest,
         destf=destf,
-        time=file_time
-    )
+        time=file_time)
 
     # Open the output file using the context manager.
     with open(f"{output_kml_file}", "w", encoding="utf-8") as f:
 
         # Write the header data of the output .kml file.
-        kml_header = localSigLocVisitKmlFileHeader()
+        kml_header = cloud_v2_sqlite_signif_loc_kml_file_header()
 
         f.write(kml_header)
 
@@ -66,39 +61,33 @@ def localSigLocVisitToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record_Number"]
-            Z_PK = row["Z_PK"]
-            data_point_count = row["DataPointCount"]
-            location_of_interest_id = row["LocationOfInterestID"]
-            creation_date_utc = row["CreationDate(UTC)"]
-            entry_date_utc = row["EntryDate(UTC)"]
-            exit_date_utc = row["ExitDate(UTC)"]
-            expiration_date_utc = row["ExpirationDate(UTC)"]
-            latitude = row["LATITUDE"]
-            longitude = row["LONGITUDE"]
-            location_horiz_uncertainty = row["LocationHorizontalUncertainty"]
-            location_confidence = row["LocationConfidence"]
-            data_source = row["Data_Source"]
+            record = row["record_number"]
+            Z_PK = row["z_pk"]
+            address_info = row["address_info"]
+            probable_place_name = row["probable_place_name"]
+            latitude = row["latitude"]
+            longitude = row["longitude"]
+            uncertainty = row["uncertainty"]
+            add_create_utc = row["address_creation_date_utc"]
+            add_expire_utc = row["address_expire_date_utc"]
+            data_source = row["data_source"]
 
             # Print message to screen with each record number added.
-            c.print(f"    [grey66]Processing Row # [dodger_blue1]{record:,} \
+            c.print(f"    [grey66]Processing Row # [dodger_blue1]{record:04d} \
 [grey66]| Z_PK# [dodger_blue1]{Z_PK}")
 
             # Write the data from each record to the output .kml file.
-            kml_body = localSigLocVisitKmlFileBody(
+            kml_body = cloud_v2_sqlite_signif_loc_kml_file_body(
                 record=record,
-                data_point_count=data_point_count,
-                location_of_interest_id=location_of_interest_id,
-                creation_date_utc=creation_date_utc,
-                entry_date_utc=entry_date_utc,
-                exit_date_utc=exit_date_utc,
-                expiration_date_utc=expiration_date_utc,
+                Z_PK=Z_PK,
+                address_info=address_info,
+                probable_place_name=probable_place_name,
                 latitude=latitude,
                 longitude=longitude,
-                location_horiz_uncertainty=location_horiz_uncertainty,
-                location_confidence=location_confidence,
-                data_source=data_source
-            )
+                uncertainty=uncertainty,
+                add_create_utc=add_create_utc,
+                add_expire_utc=add_expire_utc,
+                data_source=data_source)
 
             f.write(kml_body)
 
@@ -114,13 +103,11 @@ def localSigLocVisitToKml(
         output_csv_file = hf.get_csv_file_name(
             dest=dest,
             destf=destf,
-            time=file_time
-        )
+            time=file_time)
 
         df.to_csv(
             output_csv_file,
-            index=False
-        )
+            index=False)
 
     else:
         pass
@@ -139,8 +126,8 @@ def localSigLocVisitToKml(
         output_csv_file=output_csv_file,
         count=count,
         output_kml_file=output_kml_file,
-        total_time=total_time
-    )
+        total_time=total_time)
 
     # Ask user if they want to automatically open the output file.
     hf.ask_open_output_kml_file(kml_file=output_kml_file)
+

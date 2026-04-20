@@ -4,14 +4,14 @@ from rich.console import Console
 import time
 
 from functions.functions import HelperFunctions as hf
-from cacheEncBLte.cacheEncBLteVars import(
-    cacheEncBLteSqlQuery,
-    cacheEncBLteKmlFileHeader,
-    cacheEncBLteKmlFileBody)
+from vars.cache_encb_wifi import(
+    cache_encb_db_wifi_query,
+    cache_encb_db_wifi_kml_file_header,
+    cache_encb_db_wifi_kml_file_body)
 
 c = Console()
 
-def cacheEncBLteToKml(
+def write_cache_encb_db_wifi_to_kml(
         source: str,
         dest: str,
         destf: str,
@@ -23,21 +23,17 @@ def cacheEncBLteToKml(
     # Get the time the program began to execute.
     file_start_time = time.perf_counter()
 
-    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 3 --starttime {start_time} --endtime {end_time}"""
-
-    # python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\cache_encryptedB.db" --dest "C:\Users\mikes\Desktop" --destf "test.kml" --csv y --db 3 --starttime 776779200 --endtime 776786400
+    query_command_string = f"""python .\create_kml_from_data.py --source "{source}" --dest "{dest}" --destf "{destf}" --csv {make_csv} --db 2 --starttime {start_time} --endtime {end_time}"""
 
     # Generate the SQL query to include the start_time and end_time values.
-    CACHE_ENCRYPTEDB_WIFI_QUERY = cacheEncBLteSqlQuery(
+    CACHE_ENCRYPTEDB_WIFI_QUERY = cache_encb_db_wifi_query(
         start_time=start_time,
-        end_time=end_time
-    )
+        end_time=end_time)
 
     # Query the database file.
     df = hf.query_database(
         source=source,
-        query=CACHE_ENCRYPTEDB_WIFI_QUERY
-    )
+        query=CACHE_ENCRYPTEDB_WIFI_QUERY)
 
     # Get the total number of records in the worksheet.
     number_of_rows = len(df)
@@ -50,14 +46,13 @@ def cacheEncBLteToKml(
     output_kml_file = hf.get_destf_name(
         dest=dest,
         destf=destf,
-        time=file_time
-    )
+        time=file_time)
 
     # Open the output file using the context manager.
     with open(f"{output_kml_file}", "w", encoding="utf-8") as f:
 
         # Write the header data of the output .kml file.
-        kml_header = cacheEncBLteKmlFileHeader()
+        kml_header = cache_encb_db_wifi_kml_file_header()
 
         f.write(kml_header)
 
@@ -66,36 +61,34 @@ def cacheEncBLteToKml(
 
         # Set variables from the dataframe.
         for index, row in df.iterrows():
-            record = row["Record_Number"]
-            utc_time = row["Timestamp(UTC)"]
-            latitude = row["LATITUDE"]
-            longitude = row["LONGITUDE"]
-            mcc = row["MCC"]
-            mnc = row["MNC"]
-            tac = row["TAC"]
-            ci = row["CI"]
-            horiz_accuracy = row["HorizontalAccuracy"]
-            altitude = row["Altitude"]
-            confidence = row["Confidence"]
-            data_source = row["Data_Source"]
+            record = row["record_number"]
+            mac_address = row["mac_address"]
+            utc_time = row["timestamp_utc"]
+            latitude = row["latitude"]
+            longitude = row["longitude"]
+            channel = row["channel"]
+            horiz_accuracy = row["horizontal_accuracy"]
+            altitude = row["altitude"]
+            confidence = row["confidence"]
+            data_source = row["data_source"]
 
             # Print message to screen with each record number added.
+            # DO NOT add Z_PK for this query -- the database table does not
+            # have a primary key.
             c.print(f"    [grey66]Processing Row # [dodger_blue1]{record:04d}")
 
-            site_info = f"MCC: {mcc} | MNC: {mnc} | TAC: {tac} | CI: {ci}"
-
             # Write the data from each record to the output .kml file.
-            kml_body = cacheEncBLteKmlFileBody(
+            kml_body = cache_encb_db_wifi_kml_file_body(
                 record=record,
-                utc_time=utc_time,
                 latitude=latitude,
                 longitude=longitude,
-                site_info=site_info,
+                mac_address=mac_address,
+                channel=channel,
                 horiz_accuracy=horiz_accuracy,
+                utc_time=utc_time,
                 altitude=altitude,
                 confidence=confidence,
-                data_source=data_source
-            )
+                data_source=data_source)
 
             f.write(kml_body)
 
@@ -111,13 +104,11 @@ def cacheEncBLteToKml(
         output_csv_file = hf.get_csv_file_name(
             dest=dest,
             destf=destf,
-            time=file_time
-        )
+            time=file_time)
 
         df.to_csv(
             output_csv_file,
-            index=False
-        )
+            index=False)
 
     else:
         pass
@@ -136,8 +127,7 @@ def cacheEncBLteToKml(
         output_csv_file=output_csv_file,
         count=count,
         output_kml_file=output_kml_file,
-        total_time=total_time
-    )
+        total_time=total_time)
 
     # Ask user if they want to automatically open the output file.
     hf.ask_open_output_kml_file(kml_file=output_kml_file)

@@ -3,16 +3,52 @@
 import argparse
 from argparse import RawDescriptionHelpFormatter
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from rich.console import Console
+from rich.traceback import install
+from vars.timezones import US_TIME_ZONES
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 __author__ = "@mikespon"
-__dlu__ = "02-Apr"
-__version__ = "1.2"
+__dlu__ = "20-Apr-2026"
+__version__ = "1.2.1"
 
 # Create the console object.
 c = Console()
+install()
+
+
+def convert_input_time_to_apple_time(date_string: str,
+        input_tz_name: int) -> int:
+    """Converts the time string to Apple Absolute Time based on the user-defined
+    timezone.
+
+    Args:
+        date_string: Formatted as 'YYYY-MM-DD HHMMSS'
+        input_tz_name: IANA timesone string (e.g., 'America/New_York', 'UTC')
+    """
+    try:
+        date_format = "%Y-%m-%d %H%M%S"
+        # Parse the date_string into a native datetime
+        native_dt = datetime.strptime(date_string, date_format)
+        # Interpret the native datetime as Eastern Time
+        eastern_dt = native_dt.replace(tzinfo=ZoneInfo(input_tz_name))
+        # Convert Eastern datetime to UTC
+        utc_dt = eastern_dt.astimezone(timezone.utc)
+        # Define Apple Epoch
+        apple_epoch = datetime(2001, 1, 1, tzinfo=timezone.utc)
+        # Calculate the difference in seconds
+        absolute_time = (utc_dt - apple_epoch).total_seconds()
+
+        return absolute_time
+
+    except ZoneInfoNotFoundError:
+        return f"Error: '{input_tz_name}' is not a valid IANA timezone."
+    except ValueError as e:
+        return f"Error: Please check the date format. {e}"
+
 
 
 def main() -> None:
@@ -35,10 +71,8 @@ Last Updated:
 Description:
     Create a .kml file by reading the location records from the database \
 specified in the '--db' option.
-    The '--starttime' and '--endtime' values should be given in Apple Absolute \
-Time (a/k/a Cocoa Core Data) format.
-    To convert time values to/from the required input, see: \
-'https://www.gaijin.at/en/tools/time-converter'.
+    The '--starttime' and '--endtime' values can be given as a string using the \
+following format: 'YYYY-MM-DD HHMMSS'.
 
 URL:
     github.com/LongRangeBehaviorModificationSpecialist/ios_locations_to_kml
@@ -49,23 +83,20 @@ Examples:
 [START_TIME] --endtime [END_TIME]
 
 Notes:
-    Enclose the full path in double quotes if it contains spaces."""
-)
+    Enclose the full path in double quotes if it contains spaces.""")
 
     parser.add_argument(
         "--source",
         type=Path,
         required=True,
         help="[str] Directory where database file is located (include file \
-name in path)."
-    )
+name in path).")
 
     parser.add_argument(
         "--dest",
         type=Path,
         required=True,
-        help="[str] Directory to save resulting .kml file."
-    )
+        help="[str] Directory to save resulting .kml file.")
 
     parser.add_argument(
         "--destf",
@@ -73,8 +104,7 @@ name in path)."
         required=True,
         help="[str] File name of the resulting .kml file. The current date and \
 time will be appended to the beginning of the file name with the following \
-format: 'year-month-day_hhmmss'."
-    )
+format: 'year-month-day_hhmmss'.")
 
     parser.add_argument(
         "--csv",
@@ -82,8 +112,7 @@ format: 'year-month-day_hhmmss'."
         choices=["y","n"],
         required=True,
         help="[str] Create a .csv file with the results of the query ('y' or \
-'n')."
-    )
+'n').")
 
     parser.add_argument(
         "--db",
@@ -98,24 +127,28 @@ to examine:
 3=cache_encryptedB.db (LTE locations);
 4=Cloud-V2.sqlite (Significant Locations);
 5=Local.sqlite (Significant Location Visits); or
-6=Local.sqlite (Vehicle Locations)."""
-    )
+6=Local.sqlite (Vehicle Locations).""")
 
     parser.add_argument(
         "--starttime",
-        type=int,
+        type=str,
         required=True,
-        help="[int] Timestamp of the first record to return (in Cocoa Core \
-Data format)."
-    )
+        help="[str] Timestamp of the first record to return (enter the time as \
+America/New_York timezone -- use 'YYYY-MM-DD HHMMSS' format).")
 
     parser.add_argument(
         "--endtime",
-        type=int,
+        type=str,
         required=True,
-        help="[int] Timestamp of the last record to return (in Cocoa Core \
-Data format)."
-    )
+        help="[str] Timestamp of the last record to return (enter the time as \
+America/New_York timezone -- use 'YYYY-MM-DD HHMMSS' format).")
+
+    parser.add_argument(
+        "--tz",
+        type=str,
+        required=True,
+        default="UTC",
+        help="[str] Timezone used for the `--starttime` and `--endtime` values.")
 
     args = parser.parse_args()
     argv = vars(args)
@@ -127,6 +160,18 @@ Data format)."
     db_type = argv["db"]
     start_time = argv["starttime"]
     end_time = argv["endtime"]
+    tz = argv["tz"]
+
+    tz_code = tz.upper()
+    iana_name = US_TIME_ZONES.get(tz_code)
+
+
+    # Convert the input time strings to Apple Absolute Time
+    # Handle the string -> Apple time conversion just one time, rather
+    # than have seperate functions in each .py file.
+    start_time = convert_input_time_to_apple_time(start_time, iana_name)
+    end_time = convert_input_time_to_apple_time(end_time, iana_name)
+
 
     # Get local time when the script begins.
     t = time.localtime()
@@ -145,77 +190,82 @@ Program started : [dodger_blue1]\
 
 
     if db_type == 1:
-        from cacheSqlite.cacheSqliteToKml import cacheSqliteToKml
-        cacheSqliteToKml(
+
+        from cache_sqlite_to_kml import write_cache_sqlite_to_kml
+
+        write_cache_sqlite_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
+            file_time=file_time)
 
     elif db_type == 2:
-        from cacheEncBWifi.cacheEncBWifiToKml import cacheEncBWifiToKml
-        cacheEncBWifiToKml(
+
+        from cache_encb_db_wifi_to_kml import write_cache_encb_db_wifi_to_kml
+
+        write_cache_encb_db_wifi_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
+            file_time=file_time)
 
     elif db_type == 3:
-        from cacheEncBLte.cacheEncBLteToKml import cacheEncBLteToKml
-        cacheEncBLteToKml(
+
+        from cache_encb_db_lte_to_kml import write_cache_encb_db_lte_to_kml
+
+        write_cache_encb_db_lte_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
+            file_time=file_time)
 
     elif db_type == 4:
-        from cloudV2SigLoc.cloudV2SigLocToKml import cacheV2SigLocToKml
-        cacheV2SigLocToKml(
+
+        from cloud_v2_sqlite_signif_loc_to_kml import write_cache_v2_signif_loc_to_kml
+
+        write_cache_v2_signif_loc_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
+            file_time=file_time)
 
     elif db_type == 5:
-        from localSigLocVisits.localSigLocVisitsToKml import localSigLocVisitToKml
-        localSigLocVisitToKml(
+
+        from local_sqlite_signif_loc_visits_to_kml import write_local_sqlite_signif_visits_to_kml
+
+        write_local_sqlite_signif_visits_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
-
+            file_time=file_time)
 
     elif db_type == 6:
-        from localVehicleLoc.localVehicleLocToKml import localVehicleLocToKml
-        localVehicleLocToKml(
+
+        from local_sqlite_vehicle_loc_to_kml import write_local_sqlite_vehicle_loc_to_kml
+
+        write_local_sqlite_vehicle_loc_to_kml(
             source=source,
             dest=dest,
             destf=destf,
             make_csv=make_csv,
             start_time=start_time,
             end_time=end_time,
-            file_time=file_time
-        )
+            file_time=file_time)
 
     else:
         c.print("The code to examine the database you entered is not complete.")
@@ -223,6 +273,3 @@ Program started : [dodger_blue1]\
 
 if __name__ == "__main__":
     main()
-
-
-# python .\create_kml_from_data.py --source "C:\Users\mikes\Proton Drive\mikespon\My files\TEMP\Work_iPhone_XS_FFS\temp\Cache.sqlite" --dest "C:\Users\mikes\Desktop" --destf "test.kml" --csv y --db 1 --starttime 776779200 --endtime 776786400

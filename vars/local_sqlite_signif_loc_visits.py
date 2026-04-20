@@ -1,54 +1,48 @@
 # !/usr/bin/env python3
 
-def cloudV2SigLocSqlQuery(
+def local_sqlite_signif_loc_visits_query(
         start_time: int,
         end_time: int) -> str:
-    """Adds the `start_time` and `end_time` values to the SQL query that will
-    be run against the Cache.sqlite database file so that only records during
-    the desired time frame are returned.
-    """
-    CLOUDV2_SIG_LOC_QUERY = f"""
+    LOCAL_SIG_LOC_VISITS_QUERY = f"""
 SELECT
-    ROW_NUMBER() OVER() AS 'Record_Number',
+    ROW_NUMBER() OVER() AS 'record_number',
 
-    ZRTADDRESSMO.Z_PK AS 'Z_PK',
+    Z_PK AS 'z_pk',
+    ZDATAPOINTCOUNT AS 'data_point_count',
+    ZLOCATIONOFINTEREST AS 'location_of_interest_id',
 
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressCreationDate(UTC)',
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTADDRESSMO.ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'AddressExpireDate(UTC)',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZCREATIONDATE + 978307200, 'UNIXEPOCH')) AS 'creation_date_utc',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZENTRYDATE + 978307200, 'UNIXEPOCH')) AS 'entry_date_utc',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXITDATE + 978307200, 'UNIXEPOCH')) AS 'exit_date_utc',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZEXPIRATIONDATE + 978307200, 'UNIXEPOCH')) AS 'expiration_date_utc',
 
-    ZRTADDRESSMO.ZSUBTHOROUGHFARE || ' ' ||
-    REPLACE(ZRTADDRESSMO.ZTHOROUGHFARE, '&', 'at') || ', ' ||
-    ZRTADDRESSMO.ZLOCALITY || ', ' ||
-    ZRTADDRESSMO.ZADMINISTRATIVEAREA || ' ' ||
-    ZRTADDRESSMO.ZPOSTALCODE || ' ' ||
-    ZRTADDRESSMO.ZCOUNTRYCODE AS 'AddressInfo',
-    ZRTMAPITEMMO.ZLATITUDE AS 'LATITUDE',
-    ZRTMAPITEMMO.ZLONGITUDE AS 'LONGITUDE',
-    ZRTMAPITEMMO.ZNAME AS 'ProbablePlaceName',
-    ZRTMAPITEMMO.ZUNCERTAINTY AS 'Uncertainty',
-    'Cloud-V2.sqlite [ZRTADDRESSMO(Z_PK:' || ZRTADDRESSMO.Z_PK || ')]' AS 'Data_Source'
+    ZLOCATIONLATITUDE AS 'latitude',
+    ZLOCATIONLONGITUDE AS 'longitude',
+    ZLOCATIONHORIZONTALUNCERTAINTY AS 'location_horizontal_uncertainty',
+    ZLOCATIONOFINTERESTCONFIDENCE AS 'location_confidence',
+    'Local.sqlite [ZRTLEARNEDLOCATIONOFINTERESTVISITMO(Z_PK:' || Z_PK || ')]' AS 'data_source'
 
-FROM ZRTADDRESSMO
-    LEFT JOIN ZRTMAPITEMMO ON ZRTADDRESSMO.ZMAPITEM = ZRTMAPITEMMO.ZADDRESS
+FROM
+    ZRTLEARNEDLOCATIONOFINTERESTVISITMO
 
 WHERE
-    ZRTADDRESSMO.ZCREATIONDATE BETWEEN {start_time} AND {end_time}
+    ZCREATIONDATE BETWEEN {start_time} AND {end_time}
 
 ORDER BY
-    ZRTADDRESSMO.Z_PK ASC
+    Z_PK ASC
 """
-    return CLOUDV2_SIG_LOC_QUERY
+    return LOCAL_SIG_LOC_VISITS_QUERY
 
 
-def cloudV2SigLocKmlFileHeader() -> str:
-    CLOUDV2_SIG_LOC_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
+def local_sqlite_signif_loc_visits_kml_file_header() -> str:
+    LOCAL_SIG_LOC_VISITS_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"
   xmlns:gx="http://www.google.com/kml/ext/2.2"
   xmlns:kml="http://www.opengis.net/kml/2.2"
   xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     <Folder>
-      <name>Locations From Cloud-V2.sqlite</name>
+      <name>Significant Location Visits Local.sqlite</name>
       <open>1</open>
       <description>View All Records</description>
       <Style id="recordfolder">
@@ -106,39 +100,47 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                   </thead>
                   <tbody>
                     <tr>
-                      <td class="heading">Address</td>
-                      <td class="data">$[address_info]</td>
+                      <td class="heading">DataPointCount</td>
+                      <td class="data">$[data_point_count]</td>
                     </tr>
                     <tr>
-                      <td class="heading">ProbablePlaceName</td>
-                      <td class="data">$[probable_place_name]</td>
+                      <td class="heading">LocationOfInterest ID</td>
+                      <td class="data">$[location_of_interest_id]</td>
                     </tr>
                     <tr>
-                      <td class="heading">LATITUDE</td>
+                      <td class="heading">latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">LONGITUDE</td>
+                      <td class="heading">longitude</td>
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Uncertainty</td>
-                      <td class="data">$[uncertainty]</td>
+                      <td class="heading">CreationDate(UTC)</td>
+                      <td class="data">$[creation_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">AddressCreationDate(UTC)</td>
-                      <td class="data">$[add_create_utc]</td>
+                      <td class="heading">EntryDate(UTC)</td>
+                      <td class="data">$[entry_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">ZRTADDRESSMO Record No.</td>
-                      <td class="data">$[Z_PK]</td>
+                      <td class="heading">ExitDate(UTC)</td>
+                      <td class="data">$[exit_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">AddressExpireDate(UTC)</td>
-                      <td class="data">$[add_expire_utc]</td>
+                      <td class="heading">ExpirationDate(UTC)</td>
+                      <td class="data">$[expiration_date_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Record Source</td>
+                      <td class="heading">LocationHorizUncertainty</td>
+                      <td class="data">$[location_horiz_uncertainty]</td>
+                    </tr>
+                    <tr>
+                      <td class="heading">LocationConfidence</td>
+                      <td class="data">$[location_confidence]</td>
+                    </tr>
+                    <tr>
+                      <td class="heading">Record_Source</td>
                       <td class="data">
                         <b>Table:</b><br/>
                         $[data_source]
@@ -160,29 +162,30 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
         </ListStyle>
       </Style>
 """
-    return CLOUDV2_SIG_LOC_KML_FILE_HEADER
+    return LOCAL_SIG_LOC_VISITS_KML_FILE_HEADER
 
 
-def cloudV2SigLocKmlFileBody(
+def local_sqlite_signif_loc_visits_kml_file_body(
         record: str,
-        Z_PK: str,
-        address_info: str,
-        probable_place_name: str,
+        data_point_count: int,
+        location_of_interest_id: int,
+        creation_date_utc: str,
+        entry_date_utc: str,
+        exit_date_utc: str,
+        expiration_date_utc: str,
         latitude: int,
         longitude: int,
-        uncertainty: int,
-        add_create_utc: str,
-        add_expire_utc: str,
+        location_horiz_uncertainty: int,
+        location_confidence: int,
         data_source: str) -> str:
-    CLOUDV2_SIG_LOC_KML_FILE_BODY = f"""
+    LOCAL_SIG_LOC_VISITS_KML_FILE_BODY = f"""
       <Placemark>
         <name>{str(record).zfill(6)}</name>
         <visibility>1</visibility>
         <description>
           <![CDATA[
-            <p style="color:green">{add_create_utc[0:10]} at {add_create_utc[11:19]} UTC<br />
-            {address_info}<br />
-            ({latitude:.6f},{longitude:.6f})</p>
+            <p style="color:green">{creation_date_utc[0:10]} at {creation_date_utc[11:19]} UTC<br />
+            [{latitude:.6f}, {longitude:.6f}]</p>
             ]]>
         </description>
         <LookAt>
@@ -194,21 +197,18 @@ def cloudV2SigLocKmlFileBody(
           <range>0</range>
         </LookAt>
         <TimeStamp>
-          <when>{add_create_utc}</when>
+          <when>{creation_date_utc}</when>
         </TimeStamp>
         <styleUrl>#recordfolder</styleUrl>
         <ExtendedData>
           <Data name="rowid_text">
             <value>{str(record).zfill(6)}</value>
           </Data>
-          <Data name="z_pk">
-            <value>{Z_PK}</value>
+          <Data name="data_point_count">
+            <value>{data_point_count}</value>
           </Data>
-          <Data name="address_info">
-            <value>{address_info}</value>
-          </Data>
-          <Data name="probable_place_name">
-            <value>{probable_place_name}</value>
+          <Data name="location_of_interest_id">
+            <value>{location_of_interest_id}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>
@@ -216,14 +216,23 @@ def cloudV2SigLocKmlFileBody(
           <Data name="longitude">
             <value>{longitude:.6f}</value>
           </Data>
-          <Data name="uncertainty">
-            <value>{uncertainty:.6f}</value>
+          <Data name="creation_date_utc">
+            <value>{creation_date_utc}</value>
           </Data>
-          <Data name="add_create_utc">
-            <value>{add_create_utc}</value>
+          <Data name="entry_date_utc">
+            <value>{entry_date_utc}</value>
           </Data>
-          <Data name="add_expire_utc">
-            <value>{add_expire_utc}</value>
+          <Data name="exit_date_utc">
+            <value>{exit_date_utc}</value>
+          </Data>
+          <Data name="expiration_date_utc">
+            <value>{expiration_date_utc}</value>
+          </Data>
+          <Data name="location_horiz_uncertainty">
+            <value>{location_horiz_uncertainty:.6f} meters</value>
+          </Data>
+          <Data name="location_confidence">
+            <value>{location_confidence:.6f}</value>
           </Data>
           <Data name="data_source">
             <value>{data_source}</value>
@@ -234,4 +243,4 @@ def cloudV2SigLocKmlFileBody(
         </Point>
       </Placemark>
 """
-    return CLOUDV2_SIG_LOC_KML_FILE_BODY
+    return LOCAL_SIG_LOC_VISITS_KML_FILE_BODY

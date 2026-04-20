@@ -1,83 +1,43 @@
 # !/usr/bin/env python3
 
-def cacheSqliteSqlQuery(
+def local_sqlite_vehicle_loc_query(
         start_time: int,
         end_time: int) -> str:
-    """Adds the `start_time` and `end_time` values to the SQL query that will
-    be run against the Cache.sqlite database file so that only records during
-    the desired time frame are returned
-
-    Time stamps in this database are stored in `CF Absolute Time` a/k/a/
-    `Cocoa Core Data` time.
-    """
-
-    CACHE_SQLITE_QUERY = f"""
+    LOCAL_VEH_LOC_QUERY = f"""
 SELECT
+    ROW_NUMBER() OVER() AS 'record_number',
+    Z_PK AS 'z_pk',
 
-    ROW_NUMBER() OVER() AS 'forDF',
-    ROW_NUMBER() OVER() AS 'Record_Number',
-    ZRTCLLOCATIONMO.Z_PK AS 'Z_PK',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZDATE + 978307200, 'UNIXEPOCH')) AS 'date_time_utc',
+    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZLOCDATE + 978307200, 'UNIXEPOCH')) AS 'location_date_utc',
 
-    strftime('%Y-%m-%dT%H:%M:%SZ', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH')) AS 'Timestamp(UTC)',
-    strftime('%Y-%m-%dT%H:%M:%S', datetime(ZRTCLLOCATIONMO.ZTIMESTAMP + 978307200, 'UNIXEPOCH', 'localtime')) AS 'Timestamp(Local)',
-
-    ZRTCLLOCATIONMO.ZLATITUDE AS 'LATITUDE',
-    ZRTCLLOCATIONMO.ZLONGITUDE AS 'LONGITUDE',
-
-    RTRIM(LTRIM(CONCAT(ROUND(ZRTCLLOCATIONMO.ZLATITUDE, 6), ',', ROUND(ZRTCLLOCATIONMO.ZLONGITUDE, 6)))) AS 'GPS(Merged)',
-
-    CASE ZRTCLLOCATIONMO.ZSPEED
-        WHEN -1.0 THEN NULL
-        ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED, 4)
-    END AS 'Speed(meters/sec)',
-
-    CASE ZRTCLLOCATIONMO.ZSPEED
-        WHEN -1.0 THEN NULL
-        ELSE ROUND(ZRTCLLOCATIONMO.ZSPEED * 2.23694, 4)
-    END AS 'Speed(mph)',
-
-    CASE ZRTCLLOCATIONMO.ZCOURSE
-        WHEN -1.0 THEN NULL
-        ELSE ZRTCLLOCATIONMO.ZCOURSE
-    END AS 'Course',
-
-    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY, 4) AS 'Horiz_Accuracy(m)',
-    ROUND(ZRTCLLOCATIONMO.ZHORIZONTALACCURACY * 3.281, 4) AS 'Horiz_Accuracy(feet)',
-
-    CASE ZRTCLLOCATIONMO.ZVERTICALACCURACY
-        WHEN -1.0 THEN NULL
-        ELSE ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY, 4)
-    END AS 'Vertical_Accuracy(m)',
-
-    CASE ZRTCLLOCATIONMO.ZVERTICALACCURACY
-        WHEN -1.0 THEN NULL
-        ELSE ROUND(ZRTCLLOCATIONMO.ZVERTICALACCURACY * 3.281, 4)
-    END AS 'Vertical_Accuracy(feet)',
-
-    'Cache.sqlite [ZRTCLLOCATIONMO(Z_PK:' || ZRTCLLOCATIONMO.Z_PK || ')]' AS 'Data_Source'
+    ZLOCLATITUDE AS 'latitude',
+    ZLOCLONGITUDE AS 'longitude',
+    ZLOCUNCERTAINTY AS 'location_uncertainty',
+    ZIDENTIFIER AS 'identifier',
+    'Local.sqlite [ZRTVEHICLEEVENTHISTORYMO(Z_PK:' || Z_PK || ')]' AS 'data_source'
 
 FROM
-    ZRTCLLOCATIONMO
+    ZRTVEHICLEEVENTHISTORYMO
 
 WHERE
-    ZRTCLLOCATIONMO.ZTIMESTAMP BETWEEN {start_time} AND {end_time}
+    ZDATE BETWEEN {start_time} AND {end_time}
 
 ORDER BY
-    ZRTCLLOCATIONMO.ZTIMESTAMP ASC, ZRTCLLOCATIONMO.Z_PK
+    ZDATE ASC
 """
-    return CACHE_SQLITE_QUERY
+    return LOCAL_VEH_LOC_QUERY
 
 
-
-def cacheSqliteKmlFileHeader() -> str:
-    CACHE_SQLITE_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
+def local_sqlite_vehicle_loc_kml_file_header() -> str:
+    LOCAL_VEH_LOC_KML_FILE_HEADER = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2"
   xmlns:gx="http://www.google.com/kml/ext/2.2"
   xmlns:kml="http://www.opengis.net/kml/2.2"
   xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     <Folder>
-      <name>Locations From Cache.sqlite</name>
+      <name>Vehicle Locations From Local.sqlite</name>
       <open>1</open>
       <description>View All Records</description>
       <Style id="recordfolder">
@@ -136,39 +96,27 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
                   <tbody>
                     <tr>
                       <td class="heading">Date/Time (UTC)</td>
-                      <td class="data">$[date_time_utc]</td>
+                      <td class="data">$[utc_time]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Date/Time (Local)</td>
-                      <td class="data">$[date_time_local]</td>
+                      <td class="heading">Location Date/Time (UTC)</td>
+                      <td class="data">$[location_time_utc]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Latitude</td>
+                      <td class="heading">latitude</td>
                       <td class="data">$[latitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Longitude</td>
+                      <td class="heading">longitude</td>
                       <td class="data">$[longitude]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Combined GPS</td>
-                      <td class="data">$[loc_combined]</td>
+                      <td class="heading">Uncertainty</td>
+                      <td class="data">$[location_uncertainty]</td>
                     </tr>
                     <tr>
-                      <td class="heading">Speed</td>
-                      <td class="data">$[speed]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Course</td>
-                      <td class="data">$[course]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Horiz. Accuracy</td>
-                      <td class="data">$[horiz_accuracy]</td>
-                    </tr>
-                    <tr>
-                      <td class="heading">Vertical Accuracy</td>
-                      <td class="data">$[vert_accuracy]</td>
+                      <td class="heading">Identifier</td>
+                      <td class="data">$[identifier]</td>
                     </tr>
                     <tr>
                       <td class="heading">Record Source</td>
@@ -193,26 +141,19 @@ font-size:1.15em; font-weight:bold; padding:5px 8px; width:40%;}}
         </ListStyle>
       </Style>
 """
-    return CACHE_SQLITE_KML_FILE_HEADER
+    return LOCAL_VEH_LOC_KML_FILE_HEADER
 
 
-def cacheSqliteKmlFileBody(
+def local_sqlite_vehicle_loc_kml_file_body(
         record: str,
+        utc_time: str,
+        location_time_utc: str,
         latitude: int,
         longitude: int,
-        loc_combined: str,
-        course: str,
-        horiz_acc_meters: str,
-        utc_time: str,
-        local_time: str,
-        speed_meters_per_sec: str,
-        speed_mph: str,
-        horiz_acc_feet: str,
-        vert_acc_meters: str,
-        vert_acc_feet: str,
-        data_source: str) -> None:
-
-    file_body = f"""
+        location_uncertainty: int,
+        identifier: str,
+        data_source: str) -> str:
+    LOCAL_VEH_LOC_KML_FILE_BODY = f"""
       <Placemark>
         <name>{str(record).zfill(6)}</name>
         <visibility>1</visibility>
@@ -226,9 +167,9 @@ def cacheSqliteKmlFileBody(
           <longitude>{longitude}</longitude>
           <latitude>{latitude}</latitude>
           <altitude>0</altitude>
-          <heading>{course}</heading>
+          <heading>0</heading>
           <tilt>0</tilt>
-          <range>{horiz_acc_meters}</range>
+          <range>0</range>
         </LookAt>
         <TimeStamp>
           <when>{utc_time}</when>
@@ -238,11 +179,11 @@ def cacheSqliteKmlFileBody(
           <Data name="rowid_text">
             <value>{str(record).zfill(6)}</value>
           </Data>
-          <Data name="date_time_utc">
+          <Data name="utc_time">
             <value>{utc_time}</value>
           </Data>
-          <Data name="date_time_local">
-            <value>{local_time}</value>
+          <Data name="location_time_utc">
+            <value>{location_time_utc}</value>
           </Data>
           <Data name="latitude">
             <value>{latitude:.6f}</value>
@@ -250,20 +191,11 @@ def cacheSqliteKmlFileBody(
           <Data name="longitude">
             <value>{longitude:.6f}</value>
           </Data>
-          <Data name="loc_combined">
-            <value>{loc_combined}</value>
+          <Data name="location_uncertainty">
+            <value>{location_uncertainty:.6f}</value>
           </Data>
-          <Data name="speed">
-            <value>{speed_meters_per_sec} mps ({speed_mph} mph)</value>
-          </Data>
-          <Data name="course">
-            <value>{course}</value>
-          </Data>
-          <Data name="horiz_accuracy">
-            <value>{horiz_acc_meters} meters ({horiz_acc_feet} feet)</value>
-          </Data>
-          <Data name="vert_accuracy">
-            <value>{vert_acc_meters} meters ({vert_acc_feet} feet)</value>
+          <Data name="identifier">
+            <value>{identifier}</value>
           </Data>
           <Data name="data_source">
             <value>{data_source}</value>
@@ -272,6 +204,6 @@ def cacheSqliteKmlFileBody(
         <Point>
           <coordinates>{longitude},{latitude},0</coordinates>
         </Point>
-      </Placemark>\n"""
-
-    return file_body
+      </Placemark>
+"""
+    return LOCAL_VEH_LOC_KML_FILE_BODY
