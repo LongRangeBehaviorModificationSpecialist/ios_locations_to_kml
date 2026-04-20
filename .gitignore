@@ -1,3 +1,5 @@
 /results/
 /dbs/*
 /__pycache__/*
+/vars/__pycache__/*
+/functions/__pycache__/*
