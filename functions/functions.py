@@ -45,7 +45,7 @@ class HelperFunctions:
         return output_kml_file
 
 
-    def get_csv_file_name( dest: Path, destf: str, time: str) -> str:
+    def get_csv_file_name(dest: Path, destf: str, time: str) -> str:
         """Get the file path to save the csv file, if selected."""
         output_csv_file = Path(f"{dest}\\{time}_{destf}.csv")
         return output_csv_file
