@@ -2,13 +2,13 @@
 
 - This main script take data from various databases present in the iOS file system and pulls the location data and formats the data into .kml files.
 
-#### Syntax
+### Syntax
 
 ---
 
 `python .\make_kml.py --source [SOURCE] --dest [DESTINATION] --destf [DESTINATION_FILENAME] --csv {y,n} --db [DATABASE_OPTION] --starttime [START_TIME] --endtime [END_TIME] --tz [TIMEZONE]`
 
-#### Script Help
+### Script Help
 
 ---
 
@@ -37,16 +37,16 @@
 
 - For the `--tz` argument, use the values listed below to indicate the time zone of the `--starttime` and `--endtime` values. Use double quotes around the values (e.g., `--tz "ET"`):
 
-  - `ET` = America/New_York
-  - `CT` = America/Chicago
-  - `MT` = America/Denver
-  - `AZ` = America/Phoenix
-  - `PT` = America/Los_Angeles
+  - `ET`  = America/New_York
+  - `CT`  = America/Chicago
+  - `MT`  = America/Denver
+  - `AZ`  = America/Phoenix
+  - `PT`  = America/Los_Angeles
   - `AKT` = America/Anchorage
-  - `HT` = Pacific/Honolulu
+  - `HT`  = Pacific/Honolulu
   - `UTC` = UTC Time Zone (+00:00)
 
-#### To Do
+#### To-Do
 
 ---
 
